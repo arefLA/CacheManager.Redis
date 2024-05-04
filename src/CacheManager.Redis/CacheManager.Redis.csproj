@@ -7,6 +7,10 @@
         <Description>a generic redis cache manager for .net applications</Description>
         <Nullable>enable</Nullable>
         <TargetFramework>net5.0</TargetFramework>
+        <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
+        <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
+        <PackageTags>redis, cache manager, generic</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

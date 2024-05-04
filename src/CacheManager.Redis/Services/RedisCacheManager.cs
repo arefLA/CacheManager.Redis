@@ -11,9 +11,9 @@ namespace CacheManager.Redis.Services
 {
     internal class RedisCacheManager<TEntity> : IRedisCacheManager<TEntity> where TEntity : class
     {
-        private readonly IRedisDitributedCache _cache;
+        private readonly IRedisDistributedCache _cache;
 
-        public RedisCacheManager(IRedisDitributedCache cache)
+        public RedisCacheManager(IRedisDistributedCache cache)
             => _cache = cache;
 
         public bool TryGet(string key, out TEntity? response)
