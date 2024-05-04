@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34B433B0-1385-43B3-9515-02D6CFBE12AE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DE177608-F18B-40FF-A4AE-6332AE63C824}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Redis", "src\CacheManager.Redis\CacheManager.Redis.csproj", "{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD} = {34B433B0-1385-43B3-9515-02D6CFBE12AE}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
