@@ -1,7 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>Redic Cache Manager</Title>
+        <Authors>Aref Nozar</Authors>
+        <Description>a generic redis cache manager for .net applications</Description>
+        <Nullable>enable</Nullable>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="obj\CacheManager.Redis.csproj.nuget.dgspec.json" />
+      <Content Include="obj\Debug\net5.0\CacheManager.Redis.AssemblyInfoInputs.cache" />
+      <Content Include="obj\Debug\net5.0\CacheManager.Redis.assets.cache" />
+      <Content Include="obj\project.assets.json" />
+      <Content Include="obj\project.nuget.cache" />
+      <Content Include="obj\project.packagespec.json" />
+      <Content Include="obj\rider.project.restore.info" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="obj\Debug\net5.0\.NETCoreApp,Version=v5.0.AssemblyAttributes.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
+    </ItemGroup>
 
 </Project>

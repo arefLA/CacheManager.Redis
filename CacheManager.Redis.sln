@@ -6,6 +6,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DE177608-F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheManager.Redis", "src\CacheManager.Redis\CacheManager.Redis.csproj", "{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{9A13BEAE-4A4D-4C68-A082-C11FD3066738}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FB7D86D-3EED-4D83-82FA-99E116CADBFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A13BEAE-4A4D-4C68-A082-C11FD3066738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A13BEAE-4A4D-4C68-A082-C11FD3066738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A13BEAE-4A4D-4C68-A082-C11FD3066738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A13BEAE-4A4D-4C68-A082-C11FD3066738}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
