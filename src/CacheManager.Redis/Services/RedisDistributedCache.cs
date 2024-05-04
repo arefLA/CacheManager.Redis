@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json;
 using CacheManager.Redis.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -9,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace CacheManager.Redis.Services
 {
-    internal class RedisDistributedCache : RedisCache, IRedisDitributedCache
+    internal class RedisDistributedCache : RedisCache, IRedisDistributedCache
     {
         public RedisDistributedCache(IOptions<RedisCacheOptions> optionsAccessor) : base(optionsAccessor)
         {

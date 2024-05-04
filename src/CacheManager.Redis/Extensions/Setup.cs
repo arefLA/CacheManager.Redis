@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json;
 using CacheManager.Redis.Interfaces;
 using CacheManager.Redis.Services;
 using Microsoft.Extensions.Caching.Distributed;
@@ -15,7 +12,7 @@ namespace CacheManager.Redis.Extensions
     {
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -29,7 +26,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             string instanceName)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -43,7 +40,7 @@ namespace CacheManager.Redis.Extensions
         
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString, JsonSerializerOptions serializerOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -57,7 +54,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             DistributedCacheEntryOptions defaultOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -71,7 +68,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             string instanceName, JsonSerializerOptions serializerOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -86,7 +83,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             string instanceName, DistributedCacheEntryOptions defaultOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -101,7 +98,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             DistributedCacheEntryOptions defaultOptions, JsonSerializerOptions serializerOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
@@ -115,7 +112,7 @@ namespace CacheManager.Redis.Extensions
         public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString,
             string instanceName, DistributedCacheEntryOptions defaultOptions, JsonSerializerOptions serializerOptions)
         {
-            services.AddSingleton<IRedisDitributedCache>(x =>
+            services.AddSingleton<IRedisDistributedCache>(x =>
             {
                 var options = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 options.Value.Configuration = connectionString;
