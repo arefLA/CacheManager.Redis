@@ -9,69 +9,69 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace CacheManager.Redis.Services
 {
-    internal class RedisCacheManager<TEntity> : IRedisCacheManager<TEntity> where TEntity : class
+    public class RedisCacheManager<TEntity> : IRedisCacheManager<TEntity> where TEntity : class
     {
-        private readonly IRedisDitributedCache _cache;
+        protected readonly IRedisDistributedCache Cache;
 
-        public RedisCacheManager(IRedisDitributedCache cache)
-            => _cache = cache;
+        public RedisCacheManager(IRedisDistributedCache cache)
+            => Cache = cache;
 
-        public bool TryGet(string key, out TEntity? response)
+        public virtual bool TryGet(string key, out TEntity? response)
         {
             response = default;
-            var cachedResponse = _cache.Get(key);
+            var cachedResponse = Cache.Get(key);
             if (cachedResponse == null) return false;
     
             var responseString = Encoding.UTF8.GetString(cachedResponse);
             
-            return responseString.TryDeserialize(out response, _cache.SerializerOptions);
+            return responseString.TryDeserialize(out response, Cache.SerializerOptions);
         }
 
-        public async Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default)
+        public virtual async Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default)
         {
-            var cachedResponse = await _cache.GetAsync(key, cancellationToken);
+            var cachedResponse = await Cache.GetAsync(key, cancellationToken);
             if (cachedResponse is null) return null;
             
             var responseString = Encoding.UTF8.GetString(cachedResponse);
 
-            var isSerialized = responseString.TryDeserialize<TEntity>(out var response,_cache.SerializerOptions);
+            var isSerialized = responseString.TryDeserialize<TEntity>(out var response,Cache.SerializerOptions);
 
             return isSerialized
                 ? response
                 : null;
         }
 
-        public void Set(string key, TEntity entity)
+        public virtual void Set(string key, TEntity entity)
             => FunctionConditionRunner(
-                _cache.CacheOptions is null, 
-                () => _cache.Set(key, GetBytes(entity)),
-                () => _cache.Set(key, GetBytes(entity), _cache.CacheOptions!));
+                Cache.CacheOptions is null, 
+                () => Cache.Set(key, GetBytes(entity)),
+                () => Cache.Set(key, GetBytes(entity), Cache.CacheOptions!));
 
-        public void Set(string key, TEntity entity, DistributedCacheEntryOptions options)
-            => _cache.Set(key, GetBytes(entity), options);
+        public virtual void Set(string key, TEntity entity, DistributedCacheEntryOptions options)
+            => Cache.Set(key, GetBytes(entity), options);
 
-        public Task SetAsync(string key, TEntity entity, CancellationToken cancellationToken = default)
+        public virtual Task SetAsync(string key, TEntity entity, CancellationToken cancellationToken = default)
             => FunctionConditionRunner(
-                _cache.CacheOptions is null,
-                () => _cache.SetAsync(key, GetBytes(entity), cancellationToken),
-                () => _cache.SetAsync(key, GetBytes(entity), _cache.CacheOptions!, cancellationToken));
+                Cache.CacheOptions is null,
+                () => Cache.SetAsync(key, GetBytes(entity), cancellationToken),
+                () => Cache.SetAsync(key, GetBytes(entity), Cache.CacheOptions!, cancellationToken));
 
-        public Task SetAsync(string key, TEntity entity, DistributedCacheEntryOptions options,
+        public virtual Task SetAsync(string key, TEntity entity, DistributedCacheEntryOptions options,
             CancellationToken cancellationToken = default)
-            => _cache.SetAsync(key, GetBytes(entity), options, cancellationToken);
+            => Cache.SetAsync(key, GetBytes(entity), options, cancellationToken);
 
-        public void Refresh(string key) => _cache.Refresh(key);
+        public virtual void Refresh(string key) => Cache.Refresh(key);
 
-        public Task RefreshAsync(string key, CancellationToken cancellationToken = default) =>
-            _cache.RefreshAsync(key, cancellationToken);
+        public virtual Task RefreshAsync(string key, CancellationToken cancellationToken = default) =>
+            Cache.RefreshAsync(key, cancellationToken);
 
-        public void Remove(string key) => _cache.Remove(key);
+        public virtual void Remove(string key) => Cache.Remove(key);
 
-        public Task RemoveAsync(string key, CancellationToken cancellationToken = default) =>
-            _cache.RemoveAsync(key, cancellationToken);
+        public virtual Task RemoveAsync(string key, CancellationToken cancellationToken = default) =>
+            Cache.RemoveAsync(key, cancellationToken);
 
         private byte[] GetBytes(TEntity entity)
-            => Encoding.UTF8.GetBytes(JsonSerializer.Serialize(entity, _cache.SerializerOptions));
+            => Encoding.UTF8.GetBytes(JsonSerializer.Serialize(entity, Cache.SerializerOptions));
 
         private static void FunctionConditionRunner(bool condition, Action trueAction, Action falseAction)
         {
