@@ -7,19 +7,19 @@ A project for supporting caching with redis in ASP.NET Core wehb applications.
 If you find this project helpful for learning or solving issues in your solution, please consider giving it a star. Thank you!
 
 # Contents
-[1. Motivation](#1.-motivation)
+[1. Motivation](#1-motivation)
 
-[2. Introducing ASP.NET Core Redis Cache Manager](#2.-introducing-asp.net-core-redis-cache-manager)
+[2. Introducing ASP.NET Core Redis Cache Manager](#2-introducing-asp.net-core-redis-cache-manager)
 
-[3. Getting Started](#3.-getting-started)
+[3. Getting Started](#3-getting-started)
 
-[4. Options](#4.-options)
+[4. Options](#4-options)
 
-[5. Roadmap](#5.-roadmap)
+[5. Roadmap](#5-roadmap)
 
-[6. Related Articles](#6.-realted-articles)
+[6. Related Articles](#6-realted-articles)
 
-[7. Dependencies](#7.-dependencies)
+[7. Dependencies](#7-dependencies)
 
 # 1. Motivation
 I was working on a project using the microservices pattern, which included many services. We decided to utilize Redis as our cache database. 
@@ -55,7 +55,7 @@ This registers:
 - `IRedisDistributedCache` as singleton
 - `IRedisCacheManager` as scope
   
-This behaviour can change by [options](#4.-options)
+This behaviour can change by [options](#4-options)
 
 3. sample 
 ```
