@@ -21,7 +21,6 @@ namespace CacheManager.Redis.Interfaces
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>
         /// <param name="entity">The entity to set in the cache.</param>
-        /// <param name="options">The cache options for the entity.</param>
         void Set(string key, TEntity entity);
         
         /// <summary>
