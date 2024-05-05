@@ -166,6 +166,8 @@ While registering ASP.NET Core Redis Cahce Manger you can use these options to m
 
 i have some interesting features in my mind. i'd like to addd them to the project/package.
 
+**Unit Testing**
+
 **Auto Update Cache By Subscribing to queue or an event source**
 
 **Make it more generic: using other data store services like memcache and etc.**
