@@ -1,6 +1,6 @@
 # ASP.NET Core Redis Cache Manager
 
-A project for supporting caching with redis in ASP.NET Core wehb applications.
+A project for supporting caching with redis in ASP.NET Core web applications.
 
 # Send a Star! ⭐
 
