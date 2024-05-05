@@ -57,14 +57,127 @@ This registers:
   
 This behaviour can change by [options](#4-options)
 
-3. sample 
+3. Basic Usage
+
+Let's assume you have an object named `Book.cs` and you want to store it in cache and retrieve it.
+```
+public class Book
+{
+  public int Id { get; set; }
+  public string Name { get; set; }
+}
 ```
 
+First you need to inject the IRedisCacheManager interface with the book class
 ```
+public class MainController : Controller
+{
+  public readonly IRedisCacheManager<Book> _cacheManager;
+
+  public MainController(IRedisCacheManager<Book> cacheManager) => _cacheManager = cacheManger;
+}
+```
+
+4. Methods
+
+- TryGet
+```
+  var exist = _cacheManager.TryGet("key", out var cachedBook);
+```
+
+- TryGetAsync
+```
+  var cachedBook = await _cacheManager.TryGetAsync("key");
+```
+
+- Set
+```
+  var book = new Book { Id = 1, Name = "Redis Cache" };
+
+  _cacheManager.Set("key", newBook);
+
+  var customOptions = new DistributedCacheEntryOptions {
+    SlidingExpiration = TimeSpan.FromDays(1)
+  }
+  _cacheManager.Set("key", newBook, customOptions);
+```
+
+- SetAsync
+```
+  var book = new Book { Id = 1, Name = "Redis Cache" };
+
+  await _cacheManager.SetAsync("key", newBook);
+
+  var customOptions = new DistributedCacheEntryOptions {
+    SlidingExpiration = TimeSpan.FromDays(1)
+  }
+
+  await _cacheManager.SetAsync("key", newBook, customOptions);
+```
+* You can use other expiration types in the set method options. notice that this options only will affect the current call. if you want to have a default expiration rule see [4. Options](4-options).*
+
+- Refresh
+```
+  _cacheManager.Refresh("key");
+```
+
+- RefreshAsync
+```
+  await _cacheManager.RefreshAsync("key");
+```
+
+- Remove
+```
+  _cacheManager.Remove("key");
+```
+
+- RemoveAsync
+```
+  await _cacheManager.RemoveAsync("key");
+```
+
+**All the async endpoints accept cancellation token as an optional parameter**
+
 # 4. Options
 
+While registering ASP.NET Core Redis Cahce Manger you can use these options to more customize it
+```
+  AddRedisCacheManager("redis connection string", options =>
+  {
+      options.InstanceName = "Library:";  // add this at start of every key in the database
+      options.SerializerOptions = new JsonSerializerOptions  // use this to customize the serializer used in object convert
+      {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters =  
+        {
+            new JsonStringEnumConverter()    // custom json converters
+        }
+      },
+      options.DefaultCacheOptions = new DistributedCacheEntryOptions  // configure default cache expiration model. it can be rewrite by the set method at the runtime
+      {
+          SlidingExpiration = TimeSpan.FromDays(1)
+      };
+      options.CustomImplemntation = typeof(CustomRedisCacheManagerImplementation)  // any custom cache manager implementation, notice that it should implement IRedisCacheManager interface
+  });
+```
+*all options are optional*
+
 # 5. Roadmap
+
+i have some interesting features in my mind. i'd like to addd them to the project/package.
+
+**Auto Update Cache By Subscribing to queue or an event source**
+
+**Make it more generic: using other data store services like memcache and etc.**
+
+**Develop a middleware or filter attribute to shortcircuit the process if the cache exist**
+
+*Feel free to suggest anything*
 
 # 6. Related Articles
 
 # 7. Dependencies
+
+- **[StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/)**
+
+- **[System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)**
