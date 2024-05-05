@@ -9,7 +9,7 @@ If you find this project helpful for learning or solving issues in your solution
 # Contents
 [1. Motivation](#1-motivation)
 
-[2. Introducing ASP.NET Core Redis Cache Manager](#2-introducing-asp.net-core-redis-cache-manager)
+[2. Introducing ASP.NET Core Redis Cache Manager](#2-introducing-aspnet-core-redis-cache-manager)
 
 [3. Getting Started](#3-getting-started)
 
