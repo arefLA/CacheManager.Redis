@@ -23,7 +23,7 @@ namespace CacheManager.Redis.Extensions
                 return new RedisDistributedCache(cacheOptions, cacheMangerOptions.SerializerOptions, cacheMangerOptions.DefaultCacheOptions);
             });
             if (cacheMangerOptions.CustomImplementation is not null &&
-                typeof(IRedisCacheManager<>).IsAssignableFrom(cacheMangerOptions.CustomImplementation))
+                cacheMangerOptions.CustomImplementation.IsAssignableToGenericType(typeof(IRedisCacheManager<>)))
                 services.AddScoped(typeof(IRedisCacheManager<>), cacheMangerOptions.CustomImplementation);
             else
                 services.AddScoped(typeof(IRedisCacheManager<>), typeof(RedisCacheManager<>));
