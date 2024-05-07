@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace CacheManager.Redis.Services
 {
-    internal sealed class RedisDistributedCache : RedisCache, IRedisDistributedCache
+    public sealed class RedisDistributedCache : RedisCache, IRedisDistributedCache
     {
         public RedisDistributedCache(
             IOptions<RedisCacheOptions> optionsAccessor, 
