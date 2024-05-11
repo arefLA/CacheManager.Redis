@@ -198,3 +198,5 @@ i have some interesting features in my mind. i'd like to addd them to the projec
 - **[StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/)**
 
 - **[System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)**
+
+- **[Ardalis.GuardClauses](https://github.com/ardalis/GuardClauses)**
