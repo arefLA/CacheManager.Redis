@@ -14,6 +14,9 @@ namespace CacheManager.Redis.Interfaces
         /// <param name="key">A string identifying the requested entity.</param>
         /// <param name="cancellationToken">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the located entity or null.</returns>
+        /// <remarks>
+        /// return false if the key is null or whitespace
+        /// </remarks>
         Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>

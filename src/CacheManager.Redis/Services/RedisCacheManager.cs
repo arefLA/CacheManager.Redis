@@ -19,6 +19,8 @@ namespace CacheManager.Redis.Services
         public virtual bool TryGet(string key, out TEntity? response)
         {
             response = default;
+            if (!key.HasValue()) return false;
+            
             var cachedResponse = Cache.Get(key);
             if (cachedResponse == null) return false;
     
