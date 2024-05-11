@@ -102,6 +102,13 @@ public class MainController : Controller
   _cacheManager.Set("key", newBook, customOptions);
 ```
 
+- TrySet
+```
+  var book = new Book { Id = 1, Name = "Redis Cache" };
+
+  var result = _cacheManager.TrySet("key", newBook);
+```
+
 - SetAsync
 ```
   var book = new Book { Id = 1, Name = "Redis Cache" };
@@ -121,6 +128,11 @@ public class MainController : Controller
   _cacheManager.Refresh("key");
 ```
 
+- TryRefresh
+```
+  var result = _cacheManager.TryRefresh("key");
+```
+
 - RefreshAsync
 ```
   await _cacheManager.RefreshAsync("key");
@@ -129,6 +141,11 @@ public class MainController : Controller
 - Remove
 ```
   _cacheManager.Remove("key");
+```
+
+- TryRemove
+```
+  var result = _cacheManager.TryRefresh("key");
 ```
 
 - RemoveAsync
