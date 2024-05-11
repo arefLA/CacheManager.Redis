@@ -6,6 +6,15 @@ namespace CacheManager.Redis.Interfaces
 {
     public interface IRedisCacheManager<TEntity> where TEntity : class
     {
+        /// <summary>
+        /// Gets an entity with the given key.
+        /// </summary>
+        /// <param name="key">A string identifying the requested entity.</param>
+        /// <param name="response"></param>
+        /// <returns>A boolean which shows if the get was successful and out the located entity or null</returns>
+        /// <remarks>
+        /// return false if the key is null or whitespace
+        /// </remarks>
         bool TryGet(string key, out TEntity? response);
 
         /// <summary>

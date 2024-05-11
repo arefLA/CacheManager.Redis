@@ -31,6 +31,8 @@ namespace CacheManager.Redis.Services
 
         public virtual async Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default)
         {
+            if (!key.HasValue()) return null;
+            
             var cachedResponse = await Cache.GetAsync(key, cancellationToken);
             if (cachedResponse is null) return null;
             
