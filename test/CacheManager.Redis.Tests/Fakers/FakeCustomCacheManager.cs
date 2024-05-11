@@ -22,7 +22,17 @@ namespace CacheManager.Redis.Tests.Fakers
             throw new System.NotImplementedException();
         }
 
+        public bool TrySet(string key, T entity)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Set(string key, T entity, DistributedCacheEntryOptions options)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool TrySet(string key, T entity, DistributedCacheEntryOptions options)
         {
             throw new System.NotImplementedException();
         }
@@ -43,12 +53,22 @@ namespace CacheManager.Redis.Tests.Fakers
             throw new System.NotImplementedException();
         }
 
+        public bool TryRefresh(string key)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public async Task RefreshAsync(string key, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }
 
         public void Remove(string key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool TryRemove(string key)
         {
             throw new System.NotImplementedException();
         }

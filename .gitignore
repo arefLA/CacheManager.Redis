@@ -1,0 +1,8 @@
+/Sample/obj/
+/Sample/bin/
+/.idea/
+/CacheManager.Redis.sln.DotSettings.user
+/src/CacheManager.Redis/bin/
+/src/CacheManager.Redis/obj/
+/test/CacheManager.Redis.Tests/bin/
+/test/CacheManager.Redis.Tests/obj/
