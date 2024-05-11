@@ -56,12 +56,33 @@ namespace CacheManager.Redis.Services
                 () => Cache.Set(key, GetBytes(entity), Cache.CacheOptions!));
         }
 
+        public bool TrySet(string key, TEntity entity)
+        {
+            if (!key.HasValue())
+                return false;
+            
+            FunctionConditionRunner(
+                Cache.CacheOptions is null, 
+                () => Cache.Set(key, GetBytes(entity)),
+                () => Cache.Set(key, GetBytes(entity), Cache.CacheOptions!));
+            return true;
+        }
+
         public virtual void Set(string key, TEntity entity, DistributedCacheEntryOptions options)
         {
             if (!key.HasValue())
                 throw new ArgumentException("key should have value", nameof(key));
             
             Cache.Set(key, GetBytes(entity), options);
+        }
+
+        public bool TrySet(string key, TEntity entity, DistributedCacheEntryOptions options)
+        {
+            if (!key.HasValue())
+                return false;
+            
+            Cache.Set(key, GetBytes(entity), options);
+            return true;
         }
 
         public virtual Task SetAsync(string key, TEntity entity, CancellationToken cancellationToken = default)
@@ -89,6 +110,16 @@ namespace CacheManager.Redis.Services
             Cache.Refresh(key);
         }
 
+        public bool TryRefresh(string key)
+        {
+            if (!key.HasValue())
+                return false;
+            
+            Cache.Refresh(key);
+
+            return true;
+        }
+
         public virtual Task RefreshAsync(string key, CancellationToken cancellationToken = default)
         {
             Guard.Against.NullOrWhiteSpace(key);
@@ -101,6 +132,16 @@ namespace CacheManager.Redis.Services
             Guard.Against.NullOrWhiteSpace(key);
             
             Cache.Remove(key);
+        }
+
+        public bool TryRemove(string key)
+        {
+            if (!key.HasValue())
+                return false;
+            
+            Cache.Remove(key);
+
+            return true;
         }
 
         public virtual Task RemoveAsync(string key, CancellationToken cancellationToken = default)
