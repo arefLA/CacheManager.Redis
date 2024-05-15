@@ -1,4 +1,5 @@
-﻿using CacheManager.Redis.Interfaces;
+﻿using CacheManager.Redis.Attributes;
+using CacheManager.Redis.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -29,5 +30,18 @@ public sealed class MainController : Controller
             SlidingExpiration = TimeSpan.FromDays(1)
         }, cancellationToken);
         return Ok(newBook);
+    }
+    
+    [HttpGet]
+    [Cacheable(typeof(Book), "book-key")]
+    public Task<ActionResult<Book>> GetBookWithCacheManagerAttributeAsync(CancellationToken cancellationToken)
+    {
+        var newBook = new Book
+        {
+            Id = 1,
+            Name = "Redis Cache Manager"
+        };
+
+        return Task.FromResult<ActionResult<Book>>(Ok(newBook));
     }
 }

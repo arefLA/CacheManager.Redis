@@ -34,7 +34,7 @@ namespace CacheManager.Redis.Tests.Extensions
             AddRedisCacheManager_ShouldAddRedisCacheManagerAsScoped_WhenCalledOnAServiceCollection()
         {
             // Arrange
-            var serviceCollection = new ServiceCollection();
+            var serviceCollection = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
             
             // Act
             serviceCollection.AddRedisCacheManager("connectionString");
