@@ -1,4 +1,5 @@
 ﻿using CacheManager.Redis.Attributes;
+using CacheManager.Redis.Enums;
 using CacheManager.Redis.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -32,14 +33,45 @@ public sealed class MainController : Controller
         return Ok(newBook);
     }
     
+    /// <summary>
+    /// if the "book-key" exist in cache, this method will be short-circuiting |
+    /// if the response is 200 the content will be persisted in cache with the specified key
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet]
-    [Cacheable(typeof(Book), "book-key")]
+    [Cacheable(typeof(Book), CacheableKeyType.FromProvidedValue, "book-key")]
     public Task<ActionResult<Book>> GetBookWithCacheManagerAttributeAsync(CancellationToken cancellationToken)
     {
         var newBook = new Book
         {
             Id = 1,
             Name = "Redis Cache Manager"
+        };
+
+        return Task.FromResult<ActionResult<Book>>(Ok(newBook));
+    }
+
+    [HttpGet("[action]/{bookId}")]
+    [Cacheable(typeof(Book), CacheableKeyType.FromRouteOrQuery, "bookId")]
+    public Task<ActionResult<Book>> GetBookByIdFromRoute(int bookId, CancellationToken cancellationToken)
+    {
+        var newBook = new Book
+        {
+            Id = bookId,
+            Name = "Sample Book"
+        };
+
+        return Task.FromResult<ActionResult<Book>>(Ok(newBook));
+    }
+    
+    [Cacheable(typeof(Book), CacheableKeyType.FromModel, "book.id")]
+    public Task<ActionResult<Book>> GetBookByIdFromModel(Book book, CancellationToken cancellationToken)
+    {
+        var newBook = new Book
+        {
+            Id = book.Id,
+            Name = "Sample Book"
         };
 
         return Task.FromResult<ActionResult<Book>>(Ok(newBook));
