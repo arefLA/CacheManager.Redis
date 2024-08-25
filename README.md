@@ -189,6 +189,8 @@ i have some interesting features in my mind. i'd like to addd them to the projec
 
 **Develop a middleware or filter attribute to shortcircuit the process if the cache exist**
 
+**Develop functionality for encrypting and decrypting stored caches.**
+
 *Feel free to suggest anything*
 
 # 6. Related Articles
