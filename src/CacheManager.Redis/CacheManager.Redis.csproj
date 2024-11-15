@@ -6,7 +6,7 @@
         <Authors>Aref Nozar</Authors>
         <Description>a generic redis cache manager for .net applications</Description>
         <Nullable>enable</Nullable>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
@@ -29,8 +29,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Ardalis.GuardClauses" Version="4.5.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
+      <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.11" />
     </ItemGroup>
 
 </Project>

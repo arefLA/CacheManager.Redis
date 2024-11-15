@@ -86,7 +86,7 @@ namespace CacheManager.Redis.Tests.Services
             redisDistributedCache.GetAsync("key").Returns(bytes);
             
             // Act
-            var result = await redisCacheManager.TryGetAsync("key");
+            var result = await redisCacheManager.GetAsync("key");
 
             // Assert
             result.Should().BeEquivalentTo(expectedOut);
@@ -102,7 +102,7 @@ namespace CacheManager.Redis.Tests.Services
             redisDistributedCache.GetAsync("key").Returns(bytes);
             
             // Act
-            var result = await redisCacheManager.TryGetAsync("key");
+            var result = await redisCacheManager.GetAsync("key");
 
             // Assert
             result.Should().BeNull();
@@ -120,7 +120,7 @@ namespace CacheManager.Redis.Tests.Services
             redisDistributedCache.Get(input).Returns(bytes);
             
             // Act
-            var result = await redisCacheManager.TryGetAsync(input);
+            var result = await redisCacheManager.GetAsync(input);
 
             // Assert
             result.Should().BeNull();

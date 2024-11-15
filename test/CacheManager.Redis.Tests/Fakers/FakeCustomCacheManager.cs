@@ -12,7 +12,7 @@ namespace CacheManager.Redis.Tests.Fakers
             throw new System.NotImplementedException();
         }
 
-        public async Task<T> TryGetAsync(string key, CancellationToken cancellationToken = default)
+        public Task<T> GetAsync(string key, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }

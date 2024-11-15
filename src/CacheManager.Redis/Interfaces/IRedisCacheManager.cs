@@ -27,7 +27,7 @@ namespace CacheManager.Redis.Interfaces
         /// <remarks>
         /// return false if the key is null or whitespace
         /// </remarks>
-        Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default);
+        Task<TEntity?> GetAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the entity with the given key.
@@ -41,7 +41,7 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
         void Set(string key, TEntity entity);
-        
+
         /// <summary>
         /// Sets the entity with the given key.
         /// </summary>
@@ -52,7 +52,7 @@ namespace CacheManager.Redis.Interfaces
         /// return false if the key is null or whitespace
         /// </remarks>
         bool TrySet(string key, TEntity entity);
-        
+
         /// <summary>
         /// Sets the entity with the given key.
         /// </summary>
@@ -93,7 +93,7 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
         Task SetAsync(string key, TEntity entity, CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Sets the entity with the given key.
         /// </summary>
@@ -108,7 +108,8 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentNullException" /> if <paramref name="key" /> is null.
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
-        Task SetAsync(string key, TEntity entity, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default);
+        Task SetAsync(string key, TEntity entity, DistributedCacheEntryOptions options,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refreshes an entity in the cache based on its key, resetting its sliding expiration timeout (if any).
@@ -121,7 +122,7 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
         void Refresh(string key);
-        
+
         /// <summary>
         /// Refreshes an entity in the cache based on its key, resetting its sliding expiration timeout (if any).
         /// </summary>
@@ -157,7 +158,7 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
         void Remove(string key);
-        
+
         /// <summary>
         /// Removes the entity with the given key.
         /// </summary>
