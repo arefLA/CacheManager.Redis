@@ -11,12 +11,12 @@ namespace CacheManager.Redis.Attributes;
 
 public class CacheableAttribute : TypeFilterAttribute
 {
-    public CacheableAttribute(Type entityType) : 
+    public CacheableAttribute(Type entityType) :
         base(typeof(CacheableAttribute<>).MakeGenericType(entityType))
     {
-    }   
-    
-    public CacheableAttribute(Type entityType, CacheableKeyType keyType, string key) : 
+    }
+
+    public CacheableAttribute(Type entityType, CacheableKeyType keyType, string key) :
         base(typeof(CacheableAttribute<>).MakeGenericType(entityType))
     {
         var objects = new List<object>
@@ -26,7 +26,7 @@ public class CacheableAttribute : TypeFilterAttribute
         };
 
         Arguments = objects.ToArray();
-    }   
+    }
 }
 
 public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : class
@@ -37,14 +37,14 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
 
     public CacheableAttribute(IRedisCacheManager<TEntity> cacheManager)
         => _cacheManager = cacheManager;
-    
+
     public CacheableAttribute(IRedisCacheManager<TEntity> cacheManager, string key, CacheableKeyType keyType)
     {
         _cacheManager = cacheManager;
         _key = key;
         _keyType = keyType;
     }
-    
+
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         Guard.Against.Null(context);
@@ -57,19 +57,19 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
             OnActionExecuted(await next());
         }
     }
-            
+
     public virtual void OnActionExecuting(ActionExecutingContext context)
     {
         if (!context.ModelState.IsValid) return;
-                
+
         if (_cacheManager.TryGet(_key, out var cachedBook) && cachedBook is not null)
             context.Result = new OkObjectResult(cachedBook);
     }
-            
+
     public virtual void OnActionExecuted(ActionExecutedContext context)
     {
         if (context is not { Canceled: false, HttpContext.Response.StatusCode: 200, Result: not null }) return;
-        
+
         var result = ((JsonResult)context.Result).Value;
         if (result is TEntity entity)
             _cacheManager.Set(_key!, entity);
@@ -89,6 +89,7 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
                 var modelNameSplit = _key.Split(".");
                 if (modelNameSplit.Length != 2)
                     break;
+
                 var modelName = modelNameSplit[0];
                 var model = context.ActionArguments[modelName];
                 if (model is not null)
@@ -97,7 +98,7 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
                     var keyProperty = modelType.GetProperty(modelNameSplit[1]);
                     if (keyProperty is null)
                         break;
-                    
+
                     _key = keyProperty.GetValue(model)?.ToString()??"";
                         break;
                 }

@@ -32,7 +32,20 @@ public sealed class MainController : Controller
         }, cancellationToken);
         return Ok(newBook);
     }
-    
+
+    [HttpGet]
+    [Cacheable(typeof(Book))]
+    public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithMethodNameAsKey(CancellationToken cancellationToken)
+    {
+        var newBook = new Book
+        {
+            Id = 1,
+            Name = "Redis Cache Manager"
+        };
+
+        return Task.FromResult<ActionResult<Book>>(Ok(newBook));
+    }
+
     /// <summary>
     /// if the "book-key" exist in cache, this method will be short-circuiting |
     /// if the response is 200 the content will be persisted in cache with the specified key
@@ -41,7 +54,7 @@ public sealed class MainController : Controller
     /// <returns></returns>
     [HttpGet]
     [Cacheable(typeof(Book), CacheableKeyType.FromProvidedValue, "book-key")]
-    public Task<ActionResult<Book>> GetBookWithCacheManagerAttributeAsync(CancellationToken cancellationToken)
+    public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithProvidedKey(CancellationToken cancellationToken)
     {
         var newBook = new Book
         {
@@ -54,7 +67,7 @@ public sealed class MainController : Controller
 
     [HttpGet("[action]/{bookId}")]
     [Cacheable(typeof(Book), CacheableKeyType.FromRouteOrQuery, "bookId")]
-    public Task<ActionResult<Book>> GetBookByIdFromRoute(int bookId, CancellationToken cancellationToken)
+    public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithKeyFromRoute(int bookId, CancellationToken cancellationToken)
     {
         var newBook = new Book
         {
@@ -64,9 +77,9 @@ public sealed class MainController : Controller
 
         return Task.FromResult<ActionResult<Book>>(Ok(newBook));
     }
-    
+
     [Cacheable(typeof(Book), CacheableKeyType.FromModel, "book.id")]
-    public Task<ActionResult<Book>> GetBookByIdFromModel(Book book, CancellationToken cancellationToken)
+    public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithKeyFromModel(Book book, CancellationToken cancellationToken)
     {
         var newBook = new Book
         {
