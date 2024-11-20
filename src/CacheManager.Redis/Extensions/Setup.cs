@@ -13,7 +13,7 @@ namespace CacheManager.Redis.Extensions
         {
             var cacheMangerOptions = new RedisCacheMangerOptions();
             options?.Invoke(cacheMangerOptions);
-            services.AddSingleton<IRedisDistributedCache>(x =>
+            services.AddTransient<IRedisDistributedCache>(x =>
             {
                 var cacheOptions = x.GetRequiredService<IOptions<RedisCacheOptions>>();
                 cacheOptions.Value.Configuration = connectionString;
@@ -24,9 +24,9 @@ namespace CacheManager.Redis.Extensions
             });
             if (cacheMangerOptions.CustomImplementation is not null &&
                 cacheMangerOptions.CustomImplementation.IsAssignableToGenericType(typeof(IRedisCacheManager<>)))
-                services.AddScoped(typeof(IRedisCacheManager<>), cacheMangerOptions.CustomImplementation);
+                services.AddTransient(typeof(IRedisCacheManager<>), cacheMangerOptions.CustomImplementation);
             else
-                services.AddScoped(typeof(IRedisCacheManager<>), typeof(RedisCacheManager<>));
+                services.AddTransient(typeof(IRedisCacheManager<>), typeof(RedisCacheManager<>));
 
             return services;
         }
