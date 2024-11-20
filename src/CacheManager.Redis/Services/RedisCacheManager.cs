@@ -10,12 +10,10 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace CacheManager.Redis.Services
 {
-    public class RedisCacheManager<TEntity> : IRedisCacheManager<TEntity> where TEntity : class
+    public class RedisCacheManager<TEntity>(IRedisDistributedCache cache) : IRedisCacheManager<TEntity>
+        where TEntity : class
     {
-        protected readonly IRedisDistributedCache Cache;
-
-        public RedisCacheManager(IRedisDistributedCache cache)
-            => Cache = cache;
+        protected readonly IRedisDistributedCache Cache = cache;
 
         public virtual bool TryGet(string key, out TEntity? response)
         {
