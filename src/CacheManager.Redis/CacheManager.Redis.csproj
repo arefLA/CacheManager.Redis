@@ -6,31 +6,17 @@
         <Authors>Aref Nozar</Authors>
         <Description>a generic redis cache manager for .net applications</Description>
         <Nullable>enable</Nullable>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
         <PackageTags>redis, cache manager, generic</PackageTags>
-        <Version>1.2.0</Version>
+        <Version>1.4.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="obj\CacheManager.Redis.csproj.nuget.dgspec.json" />
-      <Content Include="obj\Debug\net5.0\CacheManager.Redis.AssemblyInfoInputs.cache" />
-      <Content Include="obj\Debug\net5.0\CacheManager.Redis.assets.cache" />
-      <Content Include="obj\project.assets.json" />
-      <Content Include="obj\project.nuget.cache" />
-      <Content Include="obj\project.packagespec.json" />
-      <Content Include="obj\rider.project.restore.info" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="obj\Debug\net5.0\.NETCoreApp,Version=v5.0.AssemblyAttributes.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Ardalis.GuardClauses" Version="4.5.0" />
-      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
+      <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.11" />
     </ItemGroup>
 
 </Project>

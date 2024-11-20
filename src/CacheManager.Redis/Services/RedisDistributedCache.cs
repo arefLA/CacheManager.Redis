@@ -6,18 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace CacheManager.Redis.Services
 {
-    public sealed class RedisDistributedCache : RedisCache, IRedisDistributedCache
+    public sealed class RedisDistributedCache(
+        IOptions<RedisCacheOptions> optionsAccessor,
+        JsonSerializerOptions? serializerOptions = null,
+        DistributedCacheEntryOptions? cacheOptions = null)
+        : RedisCache(optionsAccessor), IRedisDistributedCache
     {
-        public RedisDistributedCache(
-            IOptions<RedisCacheOptions> optionsAccessor, 
-            JsonSerializerOptions? serializerOptions = null, 
-            DistributedCacheEntryOptions? cacheOptions = null) : base(optionsAccessor)
-        {
-            SerializerOptions = serializerOptions;
-            CacheOptions = cacheOptions;
-        }
-        
-        public JsonSerializerOptions? SerializerOptions { get; }
-        public DistributedCacheEntryOptions? CacheOptions { get; }
+        public JsonSerializerOptions? SerializerOptions { get; } = serializerOptions;
+        public DistributedCacheEntryOptions? CacheOptions { get; } = cacheOptions;
     }
 }
