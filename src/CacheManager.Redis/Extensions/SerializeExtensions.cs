@@ -10,6 +10,7 @@ namespace CacheManager.Redis.Extensions
             response = default;
             if (value is null)
                 return false;
+
             try
             {
                 response = JsonSerializer.Deserialize<TType>(value, options);
