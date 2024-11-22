@@ -1,7 +1,4 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using CacheManager.Redis.Extensions;
-using Microsoft.Extensions.Caching.Distributed;
 
 var builder = WebApplication.CreateBuilder(args);
 
