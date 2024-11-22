@@ -85,9 +85,9 @@ public class MainController : Controller
   var exist = _cacheManager.TryGet("key", out var cachedBook);
 ```
 
-- TryGetAsync
+- GetAsync
 ```
-  var cachedBook = await _cacheManager.TryGetAsync("key");
+  var cachedBook = await _cacheManager.GetAsync("key");
 ```
 
 - Set
