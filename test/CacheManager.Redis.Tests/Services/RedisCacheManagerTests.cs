@@ -73,7 +73,7 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public async Task TryGetAsync_ShouldReturnTheEntity_WhenRedisCacheManagerReturnAValidValue()
+        public async Task GetAsync_ShouldReturnTheEntity_WhenRedisCacheManagerReturnAValidValue()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
@@ -93,7 +93,7 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public async Task TryGetAsync_ShouldReturnNull_WhenRedisCacheManagerReturnNull()
+        public async Task GetAsync_ShouldReturnNull_WhenRedisCacheManagerReturnNull()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
@@ -108,22 +108,32 @@ namespace CacheManager.Redis.Tests.Services
             result.Should().BeNull();
         }
         
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        public async Task TryGetAsync_ShouldReturnNull_WhenKeyIsNullOrEmpty(string? input)
+        [Fact]
+        public async Task GetAsync_ShouldThrowException_WhenKeyIsNull()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
-            byte[]? bytes = null;
-            redisDistributedCache.Get(input).Returns(bytes);
             
             // Act
-            var result = await redisCacheManager.GetAsync(input);
+            var act = () => redisCacheManager.GetAsync(null);
 
             // Assert
-            result.Should().BeNull();
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+        
+        [Fact]
+        public async Task GetAsync_ShouldThrowException_WhenKeyIsEmpty()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            
+            // Act
+            var act = () => redisCacheManager.GetAsync(string.Empty);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>();
         }
 
         [Fact]

@@ -6,17 +6,12 @@ namespace Sample.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public sealed class MainController : Controller
+public sealed class MainController(IRedisCacheManager<Book> cacheManager) : Controller
 {
-    private readonly IRedisCacheManager<Book> _cacheManager;
-
-    public MainController(IRedisCacheManager<Book> cacheManager)
-        => _cacheManager = cacheManager;
-
     [HttpGet]
     public async Task<ActionResult<Book>> GetBookAsync(CancellationToken cancellationToken)
     {
-        if (_cacheManager.TryGet("book-key", out var cachedBook) && cachedBook is not null)
+        if (cacheManager.TryGet("book-key", out var cachedBook) && cachedBook is not null)
             return Ok(cachedBook);
 
         var newBook = new Book
@@ -24,7 +19,7 @@ public sealed class MainController : Controller
             Id = 1,
             Name = "Redis Cache Manager"
         };
-        await _cacheManager.SetAsync("book-key", newBook,new DistributedCacheEntryOptions
+        await cacheManager.SetAsync("book-key", newBook,new DistributedCacheEntryOptions
         {
             SlidingExpiration = TimeSpan.FromDays(1)
         }, cancellationToken);
