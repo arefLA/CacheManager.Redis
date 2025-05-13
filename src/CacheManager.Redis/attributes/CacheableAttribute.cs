@@ -27,6 +27,19 @@ public class CacheableAttribute : TypeFilterAttribute
 
         Arguments = objects.ToArray();
     }
+    
+    public CacheableAttribute(Type entityType, CacheableKeyType keyType, string key, string prefix = "") :
+        base(typeof(CacheableAttribute<>).MakeGenericType(entityType))
+    {
+        var objects = new List<object>
+        {
+            key,
+            keyType,
+            prefix
+        };
+
+        Arguments = objects.ToArray();
+    }
 }
 
 public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : class
@@ -34,15 +47,17 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
     private readonly IRedisCacheManager<TEntity> _cacheManager;
     private string _key = string.Empty;
     private CacheableKeyType _keyType = CacheableKeyType.MethodName;
+    private string _prefix = string.Empty;
 
     public CacheableAttribute(IRedisCacheManager<TEntity> cacheManager)
         => _cacheManager = cacheManager;
 
-    public CacheableAttribute(IRedisCacheManager<TEntity> cacheManager, string key, CacheableKeyType keyType)
+    public CacheableAttribute(IRedisCacheManager<TEntity> cacheManager, string key, CacheableKeyType keyType, string prefix = "")
     {
         _cacheManager = cacheManager;
         _key = key;
         _keyType = keyType;
+        _prefix = prefix;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -81,9 +96,14 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
         {
             case CacheableKeyType.FromRouteOrQuery:
                 _key = context.ActionArguments[_key]?.ToString()??"";
+                if (string.IsNullOrWhiteSpace(_prefix))
+                    _prefix = context.ActionDescriptor.DisplayName ?? "";
+                _key = $"{_prefix}:{_key}";
                 break;
             case CacheableKeyType.MethodName:
                 _key = context.ActionDescriptor.DisplayName ?? "";
+                if (!string.IsNullOrWhiteSpace(_prefix))
+                    _key = $"{_prefix}:{_key}";
                 break;
             case CacheableKeyType.FromModel:
                 var modelNameSplit = _key.Split(".");
@@ -100,12 +120,17 @@ public class CacheableAttribute<TEntity> : IAsyncActionFilter where TEntity : cl
                         break;
 
                     _key = keyProperty.GetValue(model)?.ToString()??"";
+                    if (string.IsNullOrWhiteSpace(_prefix))
+                        _prefix = context.ActionDescriptor.DisplayName ?? "";
+                    _key = $"{_prefix}:{_key}";
                         break;
                 }
                 _key = "";
                 break;
             case CacheableKeyType.FromProvidedValue:
             default:
+                if (!string.IsNullOrWhiteSpace(_prefix))
+                    _key = $"{_prefix}:{_key}";
                 break;
         }
 

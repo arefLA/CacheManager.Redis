@@ -65,6 +65,11 @@ public sealed class MainController : Controller
         return Task.FromResult<ActionResult<Book>>(Ok(newBook));
     }
 
+    /// <summary>
+    /// Gets a book using the [Cacheable] attribute with key derived from the route or query parameter (`bookId`).
+    /// Since no prefix is provided explicitly, the prefix will be automatically generated from the action descriptor's display name.
+    /// The final cache key format will be: {DisplayName}:{bookId}
+    /// </summary>
     [HttpGet("[action]/{bookId}")]
     [Cacheable(typeof(Book), CacheableKeyType.FromRouteOrQuery, "bookId")]
     public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithKeyFromRoute(int bookId, CancellationToken cancellationToken)
@@ -78,6 +83,11 @@ public sealed class MainController : Controller
         return Task.FromResult<ActionResult<Book>>(Ok(newBook));
     }
 
+    /// <summary>
+    /// Gets a book using the [Cacheable] attribute with key derived from the model (`book.id`).
+    /// Since no prefix is provided explicitly, the prefix will be automatically generated from the action descriptor's display name.
+    /// The final cache key format will be: {DisplayName}:{book.Id}
+    /// </summary>
     [Cacheable(typeof(Book), CacheableKeyType.FromModel, "book.id")]
     public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithKeyFromModel(Book book, CancellationToken cancellationToken)
     {
@@ -89,4 +99,22 @@ public sealed class MainController : Controller
 
         return Task.FromResult<ActionResult<Book>>(Ok(newBook));
     }
+    
+    /// <summary>
+    /// Gets a book using the [Cacheable] attribute with key derived from the model (`book.id`).
+    /// A custom prefix `"GetBook"` is explicitly provided, so it will be used instead of the default action descriptor display name.
+    /// The final cache key format will be: GetBook:{book.Id}
+    /// </summary>
+    [Cacheable(typeof(Book), CacheableKeyType.FromModel, "book.id", prefix: "GetBook")]
+    public Task<ActionResult<Book>> GetBookWithCacheableAttributeWithKeyFromModelAndPrefix(Book book, CancellationToken cancellationToken)
+    {
+        var newBook = new Book
+        {
+            Id = book.Id,
+            Name = "Sample Book With Prefix"
+        };
+
+        return Task.FromResult<ActionResult<Book>>(Ok(newBook));
+    }
+
 }

@@ -8,27 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\src\CacheManager.Redis\CacheManager.Redis.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="obj\Debug\net8.0\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="obj\Debug\net8.0\Sample.AssemblyInfoInputs.cache" />
-      <Content Include="obj\Debug\net8.0\Sample.assets.cache" />
-      <Content Include="obj\Debug\net8.0\Sample.csproj.AssemblyReference.cache" />
-      <Content Include="obj\project.assets.json" />
-      <Content Include="obj\project.nuget.cache" />
-      <Content Include="obj\project.packagespec.json" />
-      <Content Include="obj\rider.project.restore.info" />
-      <Content Include="obj\Sample.csproj.nuget.dgspec.json" />
     </ItemGroup>
 
 </Project>
