@@ -102,7 +102,7 @@ public sealed class MainController : ControllerBase
 
 Available operations:
 
-- `TryGet` / `TryGetAsync` – read-through access returning `bool` or nullable values.
+- `TryGet` / `GetAsync` – read-through access returning `bool` or nullable values.
 - `Set` / `SetAsync` – write-through storage with optional `DistributedCacheEntryOptions`.
 - `TrySet` – best-effort write that returns `false` for invalid keys without throwing.
 - `Refresh` / `RefreshAsync` – reset sliding expiration.
