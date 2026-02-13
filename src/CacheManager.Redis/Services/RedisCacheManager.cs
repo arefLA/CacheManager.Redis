@@ -26,7 +26,7 @@ namespace CacheManager.Redis.Services
             return response is not null;
         }
 
-        public async Task<TEntity?> TryGetAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<TEntity?> GetAsync(string key, CancellationToken cancellationToken = default)
         {
             if (!key.HasValue()) return null;
             

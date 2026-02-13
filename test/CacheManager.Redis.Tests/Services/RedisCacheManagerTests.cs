@@ -112,31 +112,31 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public async Task GetAsync_ShouldThrowException_WhenKeyIsNull()
+        public async Task GetAsync_ShouldReturnNull_WhenKeyIsNull()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
             
             // Act
-            var act = () => redisCacheManager.GetAsync(null);
+            var actual = await redisCacheManager.GetAsync(null);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentNullException>();
+            actual.Should().BeNull();
         }
         
         [Fact]
-        public async Task GetAsync_ShouldThrowException_WhenKeyIsEmpty()
+        public async Task GetAsync_ShouldReturnNull_WhenKeyIsEmpty()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
             
             // Act
-            var act = () => redisCacheManager.GetAsync(string.Empty);
+            var actual = await redisCacheManager.GetAsync(string.Empty);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
+            actual.Should().BeNull();
         }
 
         [Fact]

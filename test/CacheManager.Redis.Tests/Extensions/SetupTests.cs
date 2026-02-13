@@ -29,7 +29,7 @@ namespace CacheManager.Redis.Tests.Extensions
             
             // Assert
             result.Should().NotBeNull();
-            result!.Lifetime.Should().Be(ServiceLifetime.Transient);
+            result!.Lifetime.Should().Be(ServiceLifetime.Singleton);
         }
         
         [Fact]
@@ -47,7 +47,7 @@ namespace CacheManager.Redis.Tests.Extensions
             
             // Assert
             result.Should().NotBeNull();
-            result!.Lifetime.Should().Be(ServiceLifetime.Transient);
+            result!.Lifetime.Should().Be(ServiceLifetime.Scoped);
             result.ImplementationType.Should().Be(typeof(RedisCacheManager<>));
         }
         
@@ -69,7 +69,7 @@ namespace CacheManager.Redis.Tests.Extensions
             
             // Assert
             result.Should().NotBeNull();
-            result!.Lifetime.Should().Be(ServiceLifetime.Transient);
+            result!.Lifetime.Should().Be(ServiceLifetime.Scoped);
             result.ImplementationType.Should().Be(typeof(FakeCustomCacheManager<>));
         }
 
