@@ -10,7 +10,7 @@ namespace CacheManager.Redis.Tests.Fakers
         public bool TryGet(string key, out T? response)
             => throw new System.NotImplementedException();
 
-        public Task<T?> TryGetAsync(string key, CancellationToken cancellationToken = default)
+        public Task<T?> GetAsync(string key, CancellationToken cancellationToken = default)
             => throw new System.NotImplementedException();
 
         public void Set(string key, T entity)
