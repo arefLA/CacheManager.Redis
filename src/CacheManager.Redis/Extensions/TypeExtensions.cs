@@ -7,6 +7,11 @@ namespace CacheManager.Redis.Extensions
     {
         public static bool IsAssignableToGenericType(this Type? givenType, Type genericType)
         {
+            if (givenType is null)
+            {
+                return false;
+            }
+
             var interfaceTypes = givenType.GetInterfaces();
 
             if (interfaceTypes.Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == genericType))

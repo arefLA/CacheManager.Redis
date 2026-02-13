@@ -7,15 +7,11 @@ namespace CacheManager.Redis.Tests.Fakers
 {
     public class FakeCustomCacheManager<T> : IRedisCacheManager<T> where T : class
     {
-        public bool TryGet(string key, out T response)
-        {
-            throw new System.NotImplementedException();
-        }
+        public bool TryGet(string key, out T? response)
+            => throw new System.NotImplementedException();
 
-        public async Task<T> TryGetAsync(string key, CancellationToken cancellationToken = default)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<T?> TryGetAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
 
         public void Set(string key, T entity)
         {
@@ -23,9 +19,7 @@ namespace CacheManager.Redis.Tests.Fakers
         }
 
         public bool TrySet(string key, T entity)
-        {
-            throw new System.NotImplementedException();
-        }
+            => throw new System.NotImplementedException();
 
         public void Set(string key, T entity, DistributedCacheEntryOptions options)
         {
@@ -33,20 +27,14 @@ namespace CacheManager.Redis.Tests.Fakers
         }
 
         public bool TrySet(string key, T entity, DistributedCacheEntryOptions options)
-        {
-            throw new System.NotImplementedException();
-        }
+            => throw new System.NotImplementedException();
 
-        public async Task SetAsync(string key, T entity, CancellationToken cancellationToken = default)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task SetAsync(string key, T entity, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
 
-        public async Task SetAsync(string key, T entity, DistributedCacheEntryOptions options,
+        public Task SetAsync(string key, T entity, DistributedCacheEntryOptions options,
             CancellationToken cancellationToken = default)
-        {
-            throw new System.NotImplementedException();
-        }
+            => throw new System.NotImplementedException();
 
         public void Refresh(string key)
         {
@@ -54,14 +42,10 @@ namespace CacheManager.Redis.Tests.Fakers
         }
 
         public bool TryRefresh(string key)
-        {
-            throw new System.NotImplementedException();
-        }
+            => throw new System.NotImplementedException();
 
-        public async Task RefreshAsync(string key, CancellationToken cancellationToken = default)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task RefreshAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
 
         public void Remove(string key)
         {
@@ -69,13 +53,9 @@ namespace CacheManager.Redis.Tests.Fakers
         }
 
         public bool TryRemove(string key)
-        {
-            throw new System.NotImplementedException();
-        }
+            => throw new System.NotImplementedException();
 
-        public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
     }
 }

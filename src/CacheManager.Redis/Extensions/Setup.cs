@@ -9,24 +9,42 @@ namespace CacheManager.Redis.Extensions
 {
     public static class Setup
     {
-        public static IServiceCollection AddRedisCacheManager(this IServiceCollection services, string connectionString, Action<RedisCacheMangerOptions>? options = null)
+        public static IServiceCollection AddRedisCacheManager(
+            this IServiceCollection services,
+            string connectionString,
+            Action<RedisCacheMangerOptions>? configure = null)
         {
-            var cacheMangerOptions = new RedisCacheMangerOptions();
-            options?.Invoke(cacheMangerOptions);
-            services.AddTransient<IRedisDistributedCache>(x =>
+            var cacheManagerOptions = new RedisCacheMangerOptions();
+            configure?.Invoke(cacheManagerOptions);
+
+            services.AddStackExchangeRedisCache(redisOptions =>
             {
-                var cacheOptions = x.GetRequiredService<IOptions<RedisCacheOptions>>();
-                cacheOptions.Value.Configuration = connectionString;
-                if (!string.IsNullOrWhiteSpace(cacheMangerOptions.InstanceName))
-                    cacheOptions.Value.InstanceName = cacheMangerOptions.InstanceName;
-                
-                return new RedisDistributedCache(cacheOptions, cacheMangerOptions.SerializerOptions, cacheMangerOptions.DefaultCacheOptions);
+                redisOptions.Configuration = connectionString;
+
+                if (!string.IsNullOrWhiteSpace(cacheManagerOptions.InstanceName))
+                {
+                    redisOptions.InstanceName = cacheManagerOptions.InstanceName;
+                }
             });
-            if (cacheMangerOptions.CustomImplementation is not null &&
-                cacheMangerOptions.CustomImplementation.IsAssignableToGenericType(typeof(IRedisCacheManager<>)))
-                services.AddTransient(typeof(IRedisCacheManager<>), cacheMangerOptions.CustomImplementation);
+
+            services.AddSingleton<IRedisDistributedCache>(provider =>
+            {
+                var cacheOptions = provider.GetRequiredService<IOptions<RedisCacheOptions>>();
+                return new RedisDistributedCache(
+                    cacheOptions,
+                    cacheManagerOptions.SerializerOptions,
+                    cacheManagerOptions.DefaultCacheOptions);
+            });
+
+            if (cacheManagerOptions.CustomImplementation is not null &&
+                cacheManagerOptions.CustomImplementation.IsAssignableToGenericType(typeof(IRedisCacheManager<>)))
+            {
+                services.AddScoped(typeof(IRedisCacheManager<>), cacheManagerOptions.CustomImplementation);
+            }
             else
-                services.AddTransient(typeof(IRedisCacheManager<>), typeof(RedisCacheManager<>));
+            {
+                services.AddScoped(typeof(IRedisCacheManager<>), typeof(RedisCacheManager<>));
+            }
 
             return services;
         }
