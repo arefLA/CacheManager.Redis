@@ -1,204 +1,221 @@
 # ASP.NET Core Redis Cache Manager
 
-A project for supporting caching with redis in ASP.NET Core web applications.
+A lightweight abstraction over `StackExchange.Redis` that offers strongly-typed caching, consistent serialization via `System.Text.Json`, and ergonomic registration helpers for ASP.NET Core apps.
 
-# Send a Star! ⭐
+> ⭐ If this project saves you time, please consider giving it a star.
 
-If you find this project helpful for learning or solving issues in your solution, please consider giving it a star. Thank you!
+---
 
-# Contents
-[1. Motivation](#1-motivation)
+## Table of Contents
+1. [Installation](#installation)
+2. [Registering the Cache Manager](#registering-the-cache-manager)
+3. [Core API Usage](#core-api-usage)
+4. [Configuring Options](#configuring-options)
+5. [Sample Application](#sample-application)
+6. [Testing the Library](#testing-the-library)
+7. [Performance & Design Notes](#performance--design-notes)
+8. [Roadmap](#roadmap)
+9. [Dependencies](#dependencies)
 
-[2. Introducing ASP.NET Core Redis Cache Manager](#2-introducing-aspnet-core-redis-cache-manager)
+---
 
-[3. Getting Started](#3-getting-started)
+## Installation
 
-[4. Options](#4-options)
+Install the package from NuGet:
 
-[5. Roadmap](#5-roadmap)
-
-[6. Related Articles](#6-realted-articles)
-
-[7. Dependencies](#7-dependencies)
-
-# 1. Motivation
-I was working on a project using the microservices pattern, which included many services. We decided to utilize Redis as our cache database. 
-To implement Redis, I attempted to use [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/), which offers a straightforward configuration process. 
-
-However, I found myself repeatedly executing the same methods for each microservice, encountering minor differences such as serialization and deserialization. 
-Eventually, With a look at [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) I developed a project capable of handling these tasks with a generic pattern, requiring minimal preparation code for public use.
-
-I've shared it here so anyone can benefit; it could save you at least a week!
-
-# 2. Introducing ASP.NET Core Redis Cache Manager
-**ASP.NET Core Redis Cache Manager** is essentially a genric cache manager using [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) and [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json). this package provide an interface and base implementation to do the convertion from bytes to the desired type.
-
-# 3. Getting Started
-1. Add the [CacheManager.Redis](https://www.nuget.org/packages/CacheManager.Redis/) to your ASP.NET Core web project.
-```
+```bash
   dotnet add package CacheManager.Redis
 ```
-*Either command or Package Manager will download and install CacheManager.Redis and all required dependencies.*
 
-2. Register CacheManager to you ASP.NET Core web project.
+Target frameworks: `net6.0`, `net8.0`.
 
-for .NET 6 or higher add this code to you `Program.cs` before `Build()`
-```
-  builder.Services.AddRedisCacheManager("redis connection string");
-```
+---
 
-fon .NET 5 or before add this code to your `Startup.cs` in `ConfigureServices` method
-```
-  services.AddRedisCacheManager("redis connection string");
-```
-This registers:
-- `IRedisDistributedCache` as singleton
-- `IRedisCacheManager` as scope
-  
-This behaviour can change by [options](#4-options)
+## Registering the Cache Manager
 
-3. Basic Usage
+Add the manager during service registration (typically in `Program.cs`):
 
-Let's assume you have an object named `Book.cs` and you want to store it in cache and retrieve it.
-```
-public class Book
-{
-  public int Id { get; set; }
-  public string Name { get; set; }
-}
-```
+```csharp
+using CacheManager.Redis.Extensions;
 
-First you need to inject the IRedisCacheManager interface with the book class
-```
-public class MainController : Controller
-{
-  public readonly IRedisCacheManager<Book> _cacheManager;
+var builder = WebApplication.CreateBuilder(args);
 
-  public MainController(IRedisCacheManager<Book> cacheManager) => _cacheManager = cacheManger;
-}
-```
-
-4. Methods
-
-- TryGet
-```
-  var exist = _cacheManager.TryGet("key", out var cachedBook);
-```
-
-- TryGetAsync
-```
-  var cachedBook = await _cacheManager.TryGetAsync("key");
-```
-
-- Set
-```
-  var book = new Book { Id = 1, Name = "Redis Cache" };
-
-  _cacheManager.Set("key", newBook);
-
-  var customOptions = new DistributedCacheEntryOptions {
-    SlidingExpiration = TimeSpan.FromDays(1)
-  }
-  _cacheManager.Set("key", newBook, customOptions);
-```
-
-- TrySet
-```
-  var book = new Book { Id = 1, Name = "Redis Cache" };
-
-  var result = _cacheManager.TrySet("key", newBook);
-```
-
-- SetAsync
-```
-  var book = new Book { Id = 1, Name = "Redis Cache" };
-
-  await _cacheManager.SetAsync("key", newBook);
-
-  var customOptions = new DistributedCacheEntryOptions {
-    SlidingExpiration = TimeSpan.FromDays(1)
-  }
-
-  await _cacheManager.SetAsync("key", newBook, customOptions);
-```
-* You can use other expiration types in the set method options. notice that this options only will affect the current call. if you want to have a default expiration rule see [4. Options](4-options).*
-
-- Refresh
-```
-  _cacheManager.Refresh("key");
-```
-
-- TryRefresh
-```
-  var result = _cacheManager.TryRefresh("key");
-```
-
-- RefreshAsync
-```
-  await _cacheManager.RefreshAsync("key");
-```
-
-- Remove
-```
-  _cacheManager.Remove("key");
-```
-
-- TryRemove
-```
-  var result = _cacheManager.TryRefresh("key");
-```
-
-- RemoveAsync
-```
-  await _cacheManager.RemoveAsync("key");
-```
-
-**All the async endpoints accept cancellation token as an optional parameter**
-
-# 4. Options
-
-While registering ASP.NET Core Redis Cahce Manger you can use these options to more customize it
-```
-  AddRedisCacheManager("redis connection string", options =>
-  {
-      options.InstanceName = "Library:";  // add this at start of every key in the database
-      options.SerializerOptions = new JsonSerializerOptions  // use this to customize the serializer used in object convert
-      {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters =  
+builder.Services.AddRedisCacheManager(
+    builder.Configuration.GetConnectionString("Redis"),
+    options =>
+    {
+        options.InstanceName = "sample:"; // optional key prefix
+        options.SerializerOptions = new JsonSerializerOptions
         {
-            new JsonStringEnumConverter()    // custom json converters
-        }
-      },
-      options.DefaultCacheOptions = new DistributedCacheEntryOptions  // configure default cache expiration model. it can be rewrite by the set method at the runtime
-      {
-          SlidingExpiration = TimeSpan.FromDays(1)
-      };
-      options.CustomImplemntation = typeof(CustomRedisCacheManagerImplementation)  // any custom cache manager implementation, notice that it should implement IRedisCacheManager interface
-  });
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        };
+        options.DefaultCacheOptions = new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(30)
+        };
+        // options.CustomImplementation = typeof(CustomCacheManager<>);
+    });
 ```
-*all options are optional*
 
-# 5. Roadmap
+This call will:
 
-i have some interesting features in my mind. i'd like to addd them to the project/package.
+- Register `StackExchange.Redis` using your connection string.
+- Expose `IRedisDistributedCache` as a singleton wrapper that carries serializer/options metadata.
+- Register `IRedisCacheManager<T>` as scoped (or a custom implementation if provided).
 
-**Auto Update Cache By Subscribing to queue or an event source**
+> **Tip:** The connection string should embed SSL/password settings as needed, e.g. `mycache.redis.cache.windows.net:6380,password=...,ssl=True`.
 
-**Make it more generic: using other data store services like memcache and etc.**
+---
 
-**Develop a middleware or filter attribute to shortcircuit the process if the cache exist**
+## Core API Usage
 
-**Develop functionality for encrypting and decrypting stored caches.**
+Inject `IRedisCacheManager<T>` wherever you need typed access to Redis:
 
-*Feel free to suggest anything*
+```csharp
+public sealed class MainController : ControllerBase
+{
+    private readonly IRedisCacheManager<Book> _cacheManager;
 
-# 6. Related Articles
+    public MainController(IRedisCacheManager<Book> cacheManager)
+        => _cacheManager = cacheManager;
 
-# 7. Dependencies
+    [HttpGet("async")]
+    public async Task<ActionResult<Book>> GetBookAsync(CancellationToken cancellationToken)
+    {
+        if (_cacheManager.TryGet("book-key", out var cachedBook) && cachedBook is not null)
+        {
+            return Ok(cachedBook);
+        }
 
-- **[StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/)**
+        var book = new Book { Id = 1, Name = "Redis Cache Manager" };
+        await _cacheManager.SetAsync(
+            "book-key",
+            book,
+            new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromDays(1) },
+            cancellationToken);
 
-- **[System.Text.Json](https://learn.microsoft.com/en-us/dotnet/api/system.text.json)**
+        return Ok(book);
+    }
+}
+```
 
-- **[Ardalis.GuardClauses](https://github.com/ardalis/GuardClauses)**
+Available operations:
+
+- `TryGet` / `TryGetAsync` – read-through access returning `bool` or nullable values.
+- `Set` / `SetAsync` – write-through storage with optional `DistributedCacheEntryOptions`.
+- `TrySet` – best-effort write that returns `false` for invalid keys without throwing.
+- `Refresh` / `RefreshAsync` – reset sliding expiration.
+- `Remove` / `RemoveAsync` – evict cache entries.
+
+Serialization is handled through `System.Text.Json`; you can override serializer settings globally via registration options.
+
+---
+
+## Configuring Options
+
+`RedisCacheMangerOptions` (note the historical spelling) allows you to tailor behaviour:
+
+| Option | Description |
+| --- | --- |
+| `InstanceName` | Prefix automatically added to every key stored via this manager. Helpful for multi-tenant or shared Redis deployments. |
+| `SerializerOptions` | Supply a `JsonSerializerOptions` instance for consistent naming policies, converters, etc. |
+| `DefaultCacheOptions` | Provide default `DistributedCacheEntryOptions` so that `Set`/`SetAsync` calls without explicit options still expire. |
+| `CustomImplementation` | Replace the default `RedisCacheManager<T>` with your own implementation/decorator. Must implement `IRedisCacheManager<T>`. |
+
+### Custom decorator example
+
+```csharp
+public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : class
+{
+    private readonly IRedisCacheManager<T> _inner;
+    private readonly ILogger<LoggingCacheManager<T>> _logger;
+
+    public LoggingCacheManager(IRedisCacheManager<T> inner, ILogger<LoggingCacheManager<T>> logger)
+    {
+        _inner = inner;
+        _logger = logger;
+    }
+
+    public bool TryGet(string key, out T? response)
+    {
+        var hit = _inner.TryGet(key, out response);
+        _logger.LogDebug("Cache {Result} for {Key}", hit ? "hit" : "miss", key);
+        return hit;
+    }
+
+    // delegate remaining members ...
+}
+```
+
+Register by setting `options.CustomImplementation = typeof(LoggingCacheManager<>)`.
+
+---
+
+## Sample Application
+
+The `Sample/` folder contains a minimal ASP.NET Core API that exercises the package.
+
+Key endpoints in `Sample/Controllers/MainController.cs`:
+
+- `GET /main/async` – asynchronous read/write with custom expiration.
+- `GET /main/sync` – synchronous access using default cache options.
+- `POST /main/refresh/{key}` – refresh existing entries.
+- `DELETE /main/{key}` – remove entries safely via `TryRemove`.
+
+The `Sample.http` scratch file contains ready-to-run HTTP requests for these endpoints. Update `Sample/appsettings.json` with a valid Redis connection string before running:
+
+```bash
+dotnet run --project Sample/Sample.csproj
+```
+
+---
+
+## Testing the Library
+
+Unit tests live under `test/CacheManager.Redis.Tests` and target both `net6.0` and `net8.0`. They cover:
+
+- Serialization helpers (`SerializeExtensions`, `Helpers.HasValue`).
+- Dependency injection setup (`SetupTests`).
+- `RedisCacheManager` behaviours (sync/async, error handling, refresh/remove).
+
+Run the suite with:
+
+```bash
+dotnet test CacheManager.Redis.sln
+```
+
+> Need integration coverage? Spin up a disposable Redis instance (Docker, Azure Cache for Redis emulator, etc.) and add tests under a separate project referencing this library.
+
+---
+
+## Performance & Design Notes
+
+- **Binary serialization** – the cache manager now uses `JsonSerializer.SerializeToUtf8Bytes` / `JsonSerializer.Deserialize` directly, avoiding intermediate `string` allocations.
+- **Reusable configuration** – `AddRedisCacheManager` bootstraps `AddStackExchangeRedisCache`, ensuring a single `IConnectionMultiplexer` instance via the built-in provider and registering the `IRedisDistributedCache` wrapper as a singleton.
+- **Null safety** – extension helpers guard against null input and no longer throw when `Type.BaseType` is null.
+- **Extensibility** – provide custom cache managers or decorators for logging, metrics, encryption, etc., using the built-in options hook.
+- **Observability** – collect cache hit/miss metrics and failures by plugging in a decorator. See [`docs/performance-and-observability.md`](docs/performance-and-observability.md) for additional guidance.
+
+---
+
+## Roadmap
+
+- Automatic cache invalidation hooks (e.g., Redis pub/sub or queue listeners).
+- Additional backing stores behind the same abstraction (memcached, in-memory fallbacks).
+- Optional middleware/filter packages for transparent caching in MVC or minimal APIs.
+- Built-in instrumentation helpers (logging, metrics) with opt-in decorators.
+
+Contributions and feature requests are welcome—open an issue to discuss ideas.
+
+---
+
+## Dependencies
+
+- [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/)
+- [System.Text.Json](https://learn.microsoft.com/dotnet/api/system.text.json)
+- [Ardalis.GuardClauses](https://github.com/ardalis/GuardClauses)
+
+---
+
+Happy caching! Feel free to reach out or file issues if you run into problems. Contributions of documentation, tests, and new samples are especially appreciated. 🚀

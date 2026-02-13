@@ -2,7 +2,7 @@
 {
     public class SampleObject
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int SomeProp { get; set; }
     }
 }
