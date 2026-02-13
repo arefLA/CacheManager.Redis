@@ -11,7 +11,7 @@
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
         <PackageTags>redis, cache manager, generic</PackageTags>
-        <Version>2.1.0</Version>
+        <Version>2.1.1</Version>
         <IsPackable>true</IsPackable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
