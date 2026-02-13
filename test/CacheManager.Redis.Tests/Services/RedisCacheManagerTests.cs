@@ -1,4 +1,7 @@
-﻿using System;
+﻿#pragma warning disable CS8604
+#pragma warning disable CS8625
+
+using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -109,31 +112,31 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public async Task GetAsync_ShouldThrowException_WhenKeyIsNull()
+        public async Task GetAsync_ShouldReturnNull_WhenKeyIsNull()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
             
             // Act
-            var act = () => redisCacheManager.GetAsync(null);
+            var actual = await redisCacheManager.GetAsync(null);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentNullException>();
+            actual.Should().BeNull();
         }
         
         [Fact]
-        public async Task GetAsync_ShouldThrowException_WhenKeyIsEmpty()
+        public async Task GetAsync_ShouldReturnNull_WhenKeyIsEmpty()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
             
             // Act
-            var act = () => redisCacheManager.GetAsync(string.Empty);
+            var actual = await redisCacheManager.GetAsync(string.Empty);
 
             // Assert
-            await act.Should().ThrowAsync<ArgumentException>();
+            actual.Should().BeNull();
         }
 
         [Fact]
@@ -538,5 +541,23 @@ namespace CacheManager.Redis.Tests.Services
             // Assert
             await act.Should().ThrowAsync<ArgumentException>().WithParameterName("key");
         }
+
+        [Fact]
+        public void TryGet_ShouldReturnFalse_WhenPayloadCannotBeDeserialized()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.Get("key").Returns(new byte[] { 1, 2, 3 });
+
+            // Act
+            var result = redisCacheManager.TryGet("key", out var response);
+
+            // Assert
+            result.Should().BeFalse();
+            response.Should().BeNull();
+        }
     }
+#pragma warning restore CS8625
+#pragma warning restore CS8604
 }
