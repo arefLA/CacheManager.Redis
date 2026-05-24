@@ -4,19 +4,20 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>Redis Cache Manager</Title>
         <Authors>Aref Nozarpour</Authors>
+        <Company>Phoenix.Devs</Company>
         <Description>a generic redis cache manager for .net applications</Description>
         <Nullable>enable</Nullable>
         <TargetFramework>net8.0</TargetFramework>
         <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
+        <PackageId>CacheManager.Redis</PackageId>
         <PackageTags>redis, cache manager, generic</PackageTags>
         <Version>2.1.1</Version>
         <IsPackable>true</IsPackable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     
-
     <ItemGroup>
       <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.11" />
