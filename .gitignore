@@ -7,3 +7,5 @@
 /test/CacheManager.Redis.Tests/bin/
 /test/CacheManager.Redis.Tests/obj/
 /artifacts/
+/docs/
+CLAUDE.md
