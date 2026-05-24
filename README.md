@@ -27,7 +27,7 @@ Install the package from NuGet:
   dotnet add package CacheManager.Redis
 ```
 
-Target frameworks: `net6.0`, `net8.0`.
+Target framework: `net8.0`.
 
 ---
 
@@ -125,6 +125,8 @@ Serialization is handled through `System.Text.Json`; you can override serializer
 
 ### Custom decorator example
 
+A decorator wraps the default `RedisCacheManager<T>` to add cross-cutting behaviour (logging, metrics, encryption, etc.) without replacing it. Define a class that implements `IRedisCacheManager<T>` and delegates to an inner instance:
+
 ```csharp
 public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : class
 {
@@ -144,11 +146,18 @@ public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : cla
         return hit;
     }
 
-    // delegate remaining members ...
+    // Delegate every other IRedisCacheManager<T> member to _inner.
 }
 ```
 
-Register by setting `options.CustomImplementation = typeof(LoggingCacheManager<>)`.
+Register it with [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate` extension in your application's startup. Add the `Scrutor` NuGet package to your app (it is not a dependency of `CacheManager.Redis` itself), then:
+
+```csharp
+builder.Services.AddRedisCacheManager(connectionString);
+builder.Services.Decorate(typeof(IRedisCacheManager<>), typeof(LoggingCacheManager<>));
+```
+
+> The `options.CustomImplementation` setting is for *replacing* the default implementation entirely (e.g. a test fake or a fundamentally different backend). Use it instead of Scrutor only when you do not need to delegate to the built-in `RedisCacheManager<T>`.
 
 ---
 
@@ -163,7 +172,7 @@ Key endpoints in `Sample/Controllers/MainController.cs`:
 - `POST /main/refresh/{key}` – refresh existing entries.
 - `DELETE /main/{key}` – remove entries safely via `TryRemove`.
 
-The `Sample.http` scratch file contains ready-to-run HTTP requests for these endpoints. Update `Sample/appsettings.json` with a valid Redis connection string before running:
+Update `Sample/appsettings.json` with a valid Redis connection string before running:
 
 ```bash
 dotnet run --project Sample/Sample.csproj
@@ -173,7 +182,7 @@ dotnet run --project Sample/Sample.csproj
 
 ## Testing the Library
 
-Unit tests live under `test/CacheManager.Redis.Tests` and target both `net6.0` and `net8.0`. They cover:
+Unit tests live under `test/CacheManager.Redis.Tests` and target `net8.0`. They cover:
 
 - Serialization helpers (`SerializeExtensions`, `Helpers.HasValue`).
 - Dependency injection setup (`SetupTests`).
@@ -195,7 +204,7 @@ dotnet test CacheManager.Redis.sln
 - **Reusable configuration** – `AddRedisCacheManager` bootstraps `AddStackExchangeRedisCache`, ensuring a single `IConnectionMultiplexer` instance via the built-in provider and registering the `IRedisDistributedCache` wrapper as a singleton.
 - **Null safety** – extension helpers guard against null input and no longer throw when `Type.BaseType` is null.
 - **Extensibility** – provide custom cache managers or decorators for logging, metrics, encryption, etc., using the built-in options hook.
-- **Observability** – collect cache hit/miss metrics and failures by plugging in a decorator. See [`docs/performance-and-observability.md`](docs/performance-and-observability.md) for additional guidance.
+- **Observability** – collect cache hit/miss metrics and failures by plugging in a decorator (see the **Custom decorator example** above).
 
 ---
 
