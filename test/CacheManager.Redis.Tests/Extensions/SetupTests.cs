@@ -96,5 +96,21 @@ namespace CacheManager.Redis.Tests.Extensions
             distributedCache.SerializerOptions.Should().Be(serializerOptions);
             distributedCache.CacheOptions.Should().Be(cacheOptions);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void AddRedisCacheManager_ShouldThrow_WhenConnectionStringIsNullOrWhitespace(string? input)
+        {
+            // Arrange
+            var serviceCollection = new ServiceCollection();
+
+            // Act
+            Action act = () => serviceCollection.AddRedisCacheManager(input);
+
+            // Assert
+            act.Should().Throw<ArgumentException>().WithParameterName("connectionString");
+        }
     }
 }

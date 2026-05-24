@@ -1,4 +1,5 @@
 ﻿using System;
+using Ardalis.GuardClauses;
 using CacheManager.Redis.Interfaces;
 using CacheManager.Redis.Services;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -11,9 +12,11 @@ namespace CacheManager.Redis.Extensions
     {
         public static IServiceCollection AddRedisCacheManager(
             this IServiceCollection services,
-            string connectionString,
+            string? connectionString,
             Action<RedisCacheMangerOptions>? configure = null)
         {
+            Guard.Against.NullOrWhiteSpace(connectionString);
+
             var cacheManagerOptions = new RedisCacheMangerOptions();
             configure?.Invoke(cacheManagerOptions);
 
