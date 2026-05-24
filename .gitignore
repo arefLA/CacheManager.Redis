@@ -6,3 +6,7 @@
 /src/CacheManager.Redis/obj/
 /test/CacheManager.Redis.Tests/bin/
 /test/CacheManager.Redis.Tests/obj/
+/artifacts/
+/docs/
+CLAUDE.md
+.DS_Store
