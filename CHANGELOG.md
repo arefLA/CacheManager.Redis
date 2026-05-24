@@ -5,6 +5,21 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.2] — 2026-05-24
+
+### Fixed
+- README: dropped incorrect `net6.0` target claim; package targets `net8.0` only as before (MIS-1).
+- README: removed dead link to `docs/performance-and-observability.md` (BUG-4).
+- README: removed dead link to `Sample/Sample.http` (file was deleted earlier in v2.1.0 cleanup) (N-1).
+- README: corrected the `LoggingCacheManager<T>` decorator example, which caused a circular DI exception at runtime. Rewritten to use [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate` extension (MIS-3).
+- `IRedisCacheManager<T>.GetAsync` XML documentation: corrected the "return false" remark (copy-pasted from `TryGet`) to "Returns null" (MIS-2).
+- CHANGELOG: corrected v1.3.0 and v2.1.0 entries that referenced a `[Cacheable]` action filter and `FromModel` / `FromRouteOrQuery` key sources that were never released. The work exists on an unmerged feature branch and is not part of any shipped version (BUG-3).
+
+### Internal
+- `.gitignore`: ignore `.DS_Store` globally to keep `git status` clean on macOS.
+
+---
+
 ## [2.1.1] — 2026-02-13
 
 ### Fixed
