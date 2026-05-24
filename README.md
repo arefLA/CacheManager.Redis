@@ -27,7 +27,7 @@ Install the package from NuGet:
   dotnet add package CacheManager.Redis
 ```
 
-Target framework: `net8.0`.
+Target frameworks: `net8.0`, `net10.0`.
 
 ---
 
@@ -182,7 +182,7 @@ dotnet run --project Sample/Sample.csproj
 
 ## Testing the Library
 
-Unit tests live under `test/CacheManager.Redis.Tests` and target `net8.0`. They cover:
+Unit tests live under `test/CacheManager.Redis.Tests` and target `net8.0` and `net10.0`. They cover:
 
 - Serialization helpers (`SerializeExtensions`, `Helpers.HasValue`).
 - Dependency injection setup (`SetupTests`).
