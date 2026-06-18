@@ -179,10 +179,42 @@ namespace CacheManager.Redis.Tests.Services
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
             var entity = new SampleObject();
-            
+
             // Act
             Action act = () => redisCacheManager.Set(string.Empty, entity);
-            
+
+            // Assert
+            act.Should().Throw<ArgumentException>().WithParameterName("key");
+        }
+
+        [Fact]
+        public void Set_WithOptions_ShouldThrowArgumentNullException_WhenKeyIsNull()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            var entity = new SampleObject();
+            var options = new DistributedCacheEntryOptions();
+
+            // Act
+            Action act = () => redisCacheManager.Set(null, entity, options);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("key");
+        }
+
+        [Fact]
+        public void Set_WithOptions_ShouldThrowArgumentException_WhenKeyIsEmpty()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            var entity = new SampleObject();
+            var options = new DistributedCacheEntryOptions();
+
+            // Act
+            Action act = () => redisCacheManager.Set(string.Empty, entity, options);
+
             // Assert
             act.Should().Throw<ArgumentException>().WithParameterName("key");
         }
@@ -417,7 +449,7 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public void Remove_ShouldCallDistributedCacheRefresh_WhenCalled()
+        public void Remove_ShouldCallDistributedCacheRemove_WhenCalled()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
@@ -495,7 +527,7 @@ namespace CacheManager.Redis.Tests.Services
         }
         
         [Fact]
-        public async Task RemoveAsync_ShouldCallDistributedCacheRefresh_WhenCalled()
+        public async Task RemoveAsync_ShouldCallDistributedCacheRemove_WhenCalled()
         {
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
@@ -532,10 +564,9 @@ namespace CacheManager.Redis.Tests.Services
             // Arrange
             var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
             var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
-            var entity = new SampleObject();
-            
+
             // Act
-            Func<Task> act = async () => await redisCacheManager.RefreshAsync(string.Empty);
+            Func<Task> act = async () => await redisCacheManager.RemoveAsync(string.Empty);
 
             
             // Assert
@@ -556,6 +587,21 @@ namespace CacheManager.Redis.Tests.Services
             // Assert
             result.Should().BeFalse();
             response.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetAsync_ShouldReturnNull_WhenPayloadCannotBeDeserialized()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key").Returns(new byte[] { 1, 2, 3 });
+
+            // Act
+            var result = await redisCacheManager.GetAsync("key");
+
+            // Assert
+            result.Should().BeNull();
         }
     }
 #pragma warning restore CS8625
