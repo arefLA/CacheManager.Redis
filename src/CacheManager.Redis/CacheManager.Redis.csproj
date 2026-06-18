@@ -7,13 +7,13 @@
         <Company>Phoenix.Devs</Company>
         <Description>a generic redis cache manager for .net applications</Description>
         <Nullable>enable</Nullable>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
         <PackageId>CacheManager.Redis</PackageId>
         <PackageTags>redis, cache manager, generic</PackageTags>
-        <Version>2.1.1</Version>
+        <Version>2.1.2</Version>
         <IsPackable>true</IsPackable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

@@ -71,9 +71,8 @@ namespace CacheManager.Redis.Services
 
         public void Set(string key, TEntity entity, DistributedCacheEntryOptions options)
         {
-            if (!key.HasValue())
-                throw new ArgumentException("key should have value", nameof(key));
-            
+            Guard.Against.NullOrWhiteSpace(key);
+
             cache.Set(key, Serialize(entity), options);
         }
 
