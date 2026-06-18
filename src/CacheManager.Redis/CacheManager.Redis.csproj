@@ -5,15 +5,15 @@
         <Title>Redis Cache Manager</Title>
         <Authors>Aref Nozarpour</Authors>
         <Company>Phoenix.Devs</Company>
-        <Description>a generic redis cache manager for .net applications</Description>
+        <Description>A strongly-typed, generic Redis cache manager for .NET. Wraps IDistributedCache with typed get/set, JSON serialization, and one-line DI registration.</Description>
         <Nullable>enable</Nullable>
         <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <Copyright>https://github.com/arefLA/CacheManager.Redis</Copyright>
         <PackageProjectUrl>https://github.com/arefLA/CacheManager.Redis</PackageProjectUrl>
         <RepositoryUrl>https://github.com/arefLA/CacheManager.Redis</RepositoryUrl>
         <PackageId>CacheManager.Redis</PackageId>
-        <PackageTags>redis, cache manager, generic</PackageTags>
-        <Version>2.1.2</Version>
+        <PackageTags>redis;cache;cache-manager;caching;distributed-cache;IDistributedCache;stackexchange-redis;aspnetcore;json;dotnet;generic</PackageTags>
+        <Version>2.2.0</Version>
         <IsPackable>true</IsPackable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

@@ -5,6 +5,24 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.2.0] — 2026-06-18
+
+### Added
+- Multi-targeting: the package now ships for `net8.0` and `net10.0` (previously `net8.0` only), expanding support for projects on the latest .NET.
+
+### Changed
+- `AddRedisCacheManager(connectionString)` now accepts a nullable `string?` and guards internally — throwing a clear `ArgumentException` at registration instead of a `NullReferenceException` when the connection string is null. Source-compatible for existing callers.
+- NuGet listing metadata: clearer package description and expanded tags for discoverability.
+
+### Fixed
+- `Set(key, entity, options)` now throws `ArgumentNullException` for a null key (was `ArgumentException`), matching the documented interface contract.
+
+### Internal
+- Test corrections: fixed an async empty-key test that called the wrong method, renamed two tests that referenced "Refresh" but asserted Remove, and added an async corrupt-payload deserialization test.
+- Sample: marked `Book.Name` as `required` to clear a CS8618 warning.
+
+---
+
 ## [2.1.2] — 2026-05-24
 
 ### Fixed
