@@ -898,6 +898,35 @@ namespace CacheManager.Redis.Tests.Services
         }
 
         [Fact]
+        public async Task GetOrSetAsync_ShouldRoundTripSubclass_WhenCacheHasItsOwnSerializerOptions()
+        {
+            // Arrange: custom options that haven't been used yet, plus a set→get substitute.
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            redisDistributedCache.SerializerOptions.Returns(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            byte[]? stored = null;
+            redisDistributedCache
+                .When(c => c.SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>()))
+                .Do(call => stored = call.ArgAt<byte[]>(1));
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns(_ => stored);
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            var factoryCalls = 0;
+            Task<MarkedDog> Factory(CancellationToken _)
+            {
+                factoryCalls++;
+                return Task.FromResult(new MarkedDog { Name = "Rex", Breed = "Husky" });
+            }
+
+            // Act
+            MarkedDog first = await redisCacheManager.GetOrSetAsync("key", Factory);
+            MarkedDog second = await redisCacheManager.GetOrSetAsync("key", Factory);
+
+            // Assert
+            first.Breed.Should().Be("Husky");
+            second.Breed.Should().Be("Husky");
+            factoryCalls.Should().Be(1);
+        }
+
+        [Fact]
         public async Task GetOrSetAsync_ShouldThrowInvalidOperationException_WhenKeyHoldsADifferentSubclass()
         {
             // Arrange: the key holds a MarkedCat, but the caller asks for a MarkedDog.

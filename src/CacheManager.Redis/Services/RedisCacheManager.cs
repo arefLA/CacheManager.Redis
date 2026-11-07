@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
@@ -211,9 +210,11 @@ namespace CacheManager.Redis.Services
         {
             if (typeof(TResult) == typeof(TEntity)) return;
 
+            // options.GetTypeInfo is cached per options instance, so this costs no reflection after the first call.
+            // MakeReadOnly fills in the default resolver for unused options, as the serializer does on first use.
             var options = cache.SerializerOptions ?? DefaultSerializerOptions;
-            var resolver = options.TypeInfoResolver ?? new DefaultJsonTypeInfoResolver();
-            var derivedTypes = resolver.GetTypeInfo(typeof(TEntity), options)?.PolymorphismOptions?.DerivedTypes;
+            options.MakeReadOnly(populateMissingResolver: true);
+            var derivedTypes = options.GetTypeInfo(typeof(TEntity)).PolymorphismOptions?.DerivedTypes;
 
             if (derivedTypes is null || derivedTypes.All(d => d.DerivedType != typeof(TResult)))
                 throw new InvalidOperationException(
