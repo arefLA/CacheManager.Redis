@@ -5,6 +5,24 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.0] — 2026-11-07
+
+### Added
+- `GetOrSetAsync(key, factory, options?, cancellationToken)` on `IRedisCacheManager<T>`: returns the cached value, or calls the factory, caches the result and returns it, in one call. A corrupt cached value is treated as a miss; a `null` factory result is not cached.
+- `TryRemoveAsync` and `TryRefreshAsync`: async versions of `TryRemove` / `TryRefresh` that return `false` for a null or whitespace key instead of throwing.
+- The NuGet package now declares the MIT license (`PackageLicenseExpression`), fixing the "License missing" warning.
+
+### Changed
+- `IRedisCacheManager<T>` has three new members. If you have your own implementation or decorator, add `GetOrSetAsync`, `TryRemoveAsync` and `TryRefreshAsync` (a decorator can delegate them to the inner instance).
+- Package copyright now reads "Copyright (c) 2024 Aref Nozarpour" (was a URL).
+
+### Internal
+- Shared the cache-options fallback logic in `RedisCacheManager` (one helper instead of three copies). No behaviour change.
+- Fixed copy-pasted `<returns>` XML docs on the sync `Try*` methods.
+- 19 new tests (76 total, on net8.0 and net10.0).
+
+---
+
 ## [2.2.0] — 2026-06-18
 
 ### Added
