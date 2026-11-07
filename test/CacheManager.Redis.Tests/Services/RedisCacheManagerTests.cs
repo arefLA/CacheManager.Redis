@@ -603,6 +603,184 @@ namespace CacheManager.Redis.Tests.Services
             // Assert
             result.Should().BeNull();
         }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldReturnCachedValueWithoutCallingFactory_WhenKeyExists()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            var cached = new SampleObject { SomeProp = 10 };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cached)));
+            var factoryCalled = false;
+
+            // Act
+            var result = await redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult<SampleObject?>(new SampleObject { SomeProp = 99 });
+            });
+
+            // Assert
+            result.Should().BeEquivalentTo(cached);
+            factoryCalled.Should().BeFalse();
+            await redisDistributedCache.DidNotReceiveWithAnyArgs()
+                .SetAsync(default!, default!, default!, default);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldCallFactoryStoreAndReturnValue_WhenKeyIsMissing()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+            var created = new SampleObject { SomeProp = 5 };
+
+            // Act
+            var result = await redisCacheManager.GetOrSetAsync("key", _ => Task.FromResult<SampleObject?>(created));
+
+            // Assert
+            result.Should().BeSameAs(created);
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldUseGivenOptions_WhenKeyIsMissingAndOptionsProvided()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+            redisDistributedCache.CacheOptions.Returns(new DistributedCacheEntryOptions());
+            var options = new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromMinutes(1) };
+
+            // Act
+            await redisCacheManager.GetOrSetAsync("key",
+                _ => Task.FromResult<SampleObject?>(new SampleObject { SomeProp = 1 }), options);
+
+            // Assert
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), options, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldUseDefaultOptions_WhenKeyIsMissingAndNoOptionsProvided()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+            var defaultOptions = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) };
+            redisDistributedCache.CacheOptions.Returns(defaultOptions);
+
+            // Act
+            await redisCacheManager.GetOrSetAsync("key",
+                _ => Task.FromResult<SampleObject?>(new SampleObject { SomeProp = 1 }));
+
+            // Assert
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), defaultOptions, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldTreatCorruptPayloadAsMiss()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(Encoding.UTF8.GetBytes("not-json"));
+            var created = new SampleObject { SomeProp = 7 };
+
+            // Act
+            var result = await redisCacheManager.GetOrSetAsync("key", _ => Task.FromResult<SampleObject?>(created));
+
+            // Assert
+            result.Should().BeSameAs(created);
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldNotStoreAndReturnNull_WhenFactoryReturnsNull()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+
+            // Act
+            var result = await redisCacheManager.GetOrSetAsync("key", _ => Task.FromResult<SampleObject?>(null));
+
+            // Assert
+            result.Should().BeNull();
+            await redisDistributedCache.DidNotReceiveWithAnyArgs()
+                .SetAsync(default!, default!, default!, default);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowArgumentNullException_WhenKeyIsNull()
+        {
+            var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
+
+            var act = () => redisCacheManager.GetOrSetAsync(null, _ => Task.FromResult<SampleObject?>(null));
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowArgumentException_WhenKeyIsEmpty()
+        {
+            var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
+
+            var act = () => redisCacheManager.GetOrSetAsync(string.Empty, _ => Task.FromResult<SampleObject?>(null));
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowArgumentNullException_WhenFactoryIsNull()
+        {
+            var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
+
+            var act = () => redisCacheManager.GetOrSetAsync("key", null);
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowArgumentException_WhenKeyIsWhiteSpace()
+        {
+            var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
+
+            var act = () => redisCacheManager.GetOrSetAsync("   ", _ => Task.FromResult<SampleObject?>(null));
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldPassCancellationTokenToFactory_WhenKeyIsMissing()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+            using var cts = new CancellationTokenSource();
+            CancellationToken receivedToken = default;
+
+            // Act
+            await redisCacheManager.GetOrSetAsync("key", ct =>
+            {
+                receivedToken = ct;
+                return Task.FromResult<SampleObject?>(new SampleObject { SomeProp = 1 });
+            }, cancellationToken: cts.Token);
+
+            // Assert
+            receivedToken.Should().Be(cts.Token);
+        }
     }
 #pragma warning restore CS8625
 #pragma warning restore CS8604

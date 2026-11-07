@@ -34,20 +34,32 @@ namespace CacheManager.Redis.Services
             return cachedResponse is null ? null : Deserialize(cachedResponse);
         }
 
+        public async Task<TEntity?> GetOrSetAsync(string key, Func<CancellationToken, Task<TEntity?>> factory,
+            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            Guard.Against.NullOrWhiteSpace(key);
+            Guard.Against.Null(factory);
+
+            var cachedResponse = await cache.GetAsync(key, cancellationToken);
+            if (cachedResponse is not null)
+            {
+                var cachedEntity = Deserialize(cachedResponse);
+                if (cachedEntity is not null) return cachedEntity;
+            }
+
+            var entity = await factory(cancellationToken);
+            if (entity is null) return null;
+
+            await StoreAsync(key, Serialize(entity), options, cancellationToken);
+
+            return entity;
+        }
+
         public void Set(string key, TEntity entity)
         {
             Guard.Against.NullOrWhiteSpace(key);
-            
-            var payload = Serialize(entity);
 
-            if (cache.CacheOptions is null)
-            {
-                cache.Set(key, payload);
-            }
-            else
-            {
-                cache.Set(key, payload, cache.CacheOptions);
-            }
+            Store(key, Serialize(entity));
         }
 
         public bool TrySet(string key, TEntity entity)
@@ -55,16 +67,7 @@ namespace CacheManager.Redis.Services
             if (!key.HasValue())
                 return false;
 
-            var payload = Serialize(entity);
-
-            if (cache.CacheOptions is null)
-            {
-                cache.Set(key, payload);
-            }
-            else
-            {
-                cache.Set(key, payload, cache.CacheOptions);
-            }
+            Store(key, Serialize(entity));
 
             return true;
         }
@@ -89,11 +92,7 @@ namespace CacheManager.Redis.Services
         {
             Guard.Against.NullOrWhiteSpace(key);
 
-            var payload = Serialize(entity);
-
-            return cache.CacheOptions is null
-                ? cache.SetAsync(key, payload, cancellationToken)
-                : cache.SetAsync(key, payload, cache.CacheOptions, cancellationToken);
+            return StoreAsync(key, Serialize(entity), null, cancellationToken);
         }
 
         public Task SetAsync(string key, TEntity entity, DistributedCacheEntryOptions options,
@@ -152,6 +151,30 @@ namespace CacheManager.Redis.Services
             return cache.RemoveAsync(key, cancellationToken);
         }
             
+
+        // Stores with the registered default options, or with no options when none are configured.
+        private void Store(string key, byte[] payload)
+        {
+            if (cache.CacheOptions is null)
+            {
+                cache.Set(key, payload);
+            }
+            else
+            {
+                cache.Set(key, payload, cache.CacheOptions);
+            }
+        }
+
+        // Stores with the given options, else the registered default options, else no options.
+        private Task StoreAsync(string key, byte[] payload, DistributedCacheEntryOptions? options,
+            CancellationToken cancellationToken)
+        {
+            var effectiveOptions = options ?? cache.CacheOptions;
+
+            return effectiveOptions is null
+                ? cache.SetAsync(key, payload, cancellationToken)
+                : cache.SetAsync(key, payload, effectiveOptions, cancellationToken);
+        }
 
         private TEntity? Deserialize(byte[] bytes)
         {
