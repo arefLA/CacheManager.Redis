@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
@@ -40,6 +42,7 @@ namespace CacheManager.Redis.Services
         {
             Guard.Against.NullOrWhiteSpace(key);
             Guard.Against.Null(factory);
+            EnsureCanRoundTrip<TResult>();
 
             var cachedResponse = await cache.GetAsync(key, cancellationToken);
             if (cachedResponse is not null)
@@ -49,7 +52,7 @@ namespace CacheManager.Redis.Services
                 if (cachedEntity is not null)
                     throw new InvalidOperationException(
                         $"The cached value for key '{key}' is {cachedEntity.GetType().Name}, not {typeof(TResult).Name}. " +
-                        $"Use IRedisCacheManager<{typeof(TResult).Name}>, or add [JsonDerivedType(typeof({typeof(TResult).Name}))] to {typeof(TEntity).Name}.");
+                        "Use a different key for each type.");
             }
 
             var entity = await factory(cancellationToken);
@@ -199,6 +202,23 @@ namespace CacheManager.Redis.Services
             return effectiveOptions is null
                 ? cache.SetAsync(key, payload, cancellationToken)
                 : cache.SetAsync(key, payload, effectiveOptions, cancellationToken);
+        }
+
+        // A subclass result is only safe to cache if the serializer writes and reads it back as that subclass
+        // (e.g. [JsonDerivedType] on TEntity). Otherwise only TEntity's fields are stored and the next read
+        // returns a TEntity, so fail on the first call instead of the second.
+        private void EnsureCanRoundTrip<TResult>()
+        {
+            if (typeof(TResult) == typeof(TEntity)) return;
+
+            var options = cache.SerializerOptions ?? DefaultSerializerOptions;
+            var resolver = options.TypeInfoResolver ?? new DefaultJsonTypeInfoResolver();
+            var derivedTypes = resolver.GetTypeInfo(typeof(TEntity), options)?.PolymorphismOptions?.DerivedTypes;
+
+            if (derivedTypes is null || derivedTypes.All(d => d.DerivedType != typeof(TResult)))
+                throw new InvalidOperationException(
+                    $"IRedisCacheManager<{typeof(TEntity).Name}> can't cache {typeof(TResult).Name}: only the {typeof(TEntity).Name} fields would be stored. " +
+                    $"Use IRedisCacheManager<{typeof(TResult).Name}>, or add [JsonDerivedType(typeof({typeof(TResult).Name}))] to {typeof(TEntity).Name}.");
         }
 
         private TEntity? Deserialize(byte[] bytes)

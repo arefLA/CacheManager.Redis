@@ -44,9 +44,10 @@ namespace CacheManager.Redis.Interfaces
         /// <remarks>
         /// Throws an <see cref="ArgumentNullException" /> if <paramref name="key" /> or <paramref name="factory" /> is null.
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
-        /// Throws an <see cref="InvalidOperationException" /> if <typeparamref name="TResult"/> is a subclass of
-        /// <typeparamref name="TEntity"/> and the cached value is not that subclass. To cache subclasses, use a manager
-        /// for the subclass, or mark <typeparamref name="TEntity"/> with <c>[JsonDerivedType]</c> for each subclass.
+        /// Throws an <see cref="InvalidOperationException" /> before reading or writing the cache if <typeparamref name="TResult"/>
+        /// is a subclass of <typeparamref name="TEntity"/> that the serializer can't read back as that subclass. To cache
+        /// subclasses, use a manager for the subclass, or mark <typeparamref name="TEntity"/> with <c>[JsonDerivedType]</c>.
+        /// Also throws it if the key already holds a different subclass.
         /// A cached value that cannot be deserialized is treated as a miss.
         /// If <paramref name="factory"/> returns null, nothing is stored and null is returned.
         /// <typeparamref name="TResult"/> is inferred from <paramref name="factory"/>: a factory returning

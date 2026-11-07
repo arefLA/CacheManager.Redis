@@ -112,7 +112,7 @@ var book = await _cacheManager.GetOrSetAsync(
 
 If the factory returns `null`, nothing is cached. When you don't pass options, `DefaultCacheOptions` is used.
 
-The factory should return the manager's type (`Book` here). If it returns a subclass, use a manager for that subclass, or mark the base class with `[JsonDerivedType]`. Otherwise `GetOrSetAsync` throws an `InvalidOperationException` when it reads the cached value.
+The factory should return the manager's type (`Book` here). If it returns a subclass, use a manager for that subclass, or mark the base class with `[JsonDerivedType]`. Otherwise `GetOrSetAsync` throws an `InvalidOperationException` on the first call, before anything is cached.
 
 Available operations:
 
