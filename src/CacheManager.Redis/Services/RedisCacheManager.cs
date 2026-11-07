@@ -46,6 +46,10 @@ namespace CacheManager.Redis.Services
             {
                 var cachedEntity = Deserialize(cachedResponse);
                 if (cachedEntity is TResult cachedResult) return cachedResult;
+                if (cachedEntity is not null)
+                    throw new InvalidOperationException(
+                        $"The cached value for key '{key}' is {cachedEntity.GetType().Name}, not {typeof(TResult).Name}. " +
+                        $"Use IRedisCacheManager<{typeof(TResult).Name}>, or add [JsonDerivedType(typeof({typeof(TResult).Name}))] to {typeof(TEntity).Name}.");
             }
 
             var entity = await factory(cancellationToken);

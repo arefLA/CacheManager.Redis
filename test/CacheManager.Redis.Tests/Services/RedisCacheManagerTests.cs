@@ -822,6 +822,56 @@ namespace CacheManager.Redis.Tests.Services
         }
 
         [Fact]
+        public async Task GetOrSetAsync_ShouldReturnCachedSubclass_WhenBaseClassIsMarkedWithJsonDerivedType()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            MarkedAnimal cached = new MarkedDog { Name = "Rex", Breed = "Husky" };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.SerializeToUtf8Bytes(cached));
+            var factoryCalled = false;
+
+            // Act
+            MarkedDog result = await redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult(new MarkedDog { Name = "Other", Breed = "Other" });
+            });
+
+            // Assert
+            result.Name.Should().Be("Rex");
+            result.Breed.Should().Be("Husky");
+            factoryCalled.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowInvalidOperationException_WhenCachedValueIsNotTheRequestedSubclass()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<PlainAnimal>(redisDistributedCache);
+            PlainAnimal cached = new PlainDog { Name = "Rex", Breed = "Husky" };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.SerializeToUtf8Bytes(cached));
+            var factoryCalled = false;
+
+            // Act
+            var act = () => redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult(new PlainDog());
+            });
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*PlainAnimal, not PlainDog*");
+            factoryCalled.Should().BeFalse();
+            await redisDistributedCache.DidNotReceive()
+                .SetAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task TryRemoveAsync_ShouldReturnTrueAndRemove_WhenKeyIsValid()
         {
             // Arrange
