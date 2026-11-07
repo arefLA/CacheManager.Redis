@@ -30,6 +30,25 @@ namespace CacheManager.Redis.Interfaces
         Task<TEntity?> GetAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Gets the entity with the given key, or creates it with <paramref name="factory"/> and stores it when it is not cached.
+        /// </summary>
+        /// <param name="key">A string identifying the requested entity.</param>
+        /// <param name="factory">Creates the entity on a cache miss. It is not called when a valid cached value exists.</param>
+        /// <param name="options">Optional. The cache options for a newly stored entity. When null, the default options configured at registration are used.</param>
+        /// <param name="cancellationToken">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled. It is passed to <paramref name="factory"/>.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the cached or newly created entity.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <remarks>
+        /// Throws an <see cref="ArgumentNullException" /> if <paramref name="key" /> or <paramref name="factory" /> is null.
+        /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
+        /// A cached value that cannot be deserialized is treated as a miss.
+        /// If <paramref name="factory"/> returns null, nothing is stored and null is returned.
+        /// </remarks>
+        Task<TEntity?> GetOrSetAsync(string key, Func<CancellationToken, Task<TEntity?>> factory,
+            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Sets the entity with the given key.
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>

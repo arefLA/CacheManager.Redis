@@ -34,6 +34,37 @@ namespace CacheManager.Redis.Services
             return cachedResponse is null ? null : Deserialize(cachedResponse);
         }
 
+        public async Task<TEntity?> GetOrSetAsync(string key, Func<CancellationToken, Task<TEntity?>> factory,
+            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            Guard.Against.NullOrWhiteSpace(key);
+            Guard.Against.Null(factory);
+
+            var cachedResponse = await cache.GetAsync(key, cancellationToken);
+            if (cachedResponse is not null)
+            {
+                var cachedEntity = Deserialize(cachedResponse);
+                if (cachedEntity is not null) return cachedEntity;
+            }
+
+            var entity = await factory(cancellationToken);
+            if (entity is null) return null;
+
+            var payload = Serialize(entity);
+            var effectiveOptions = options ?? cache.CacheOptions;
+
+            if (effectiveOptions is null)
+            {
+                await cache.SetAsync(key, payload, cancellationToken);
+            }
+            else
+            {
+                await cache.SetAsync(key, payload, effectiveOptions, cancellationToken);
+            }
+
+            return entity;
+        }
+
         public void Set(string key, TEntity entity)
         {
             Guard.Against.NullOrWhiteSpace(key);
