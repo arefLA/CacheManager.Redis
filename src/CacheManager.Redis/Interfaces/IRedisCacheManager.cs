@@ -32,6 +32,7 @@ namespace CacheManager.Redis.Interfaces
         /// <summary>
         /// Gets the entity with the given key, or creates it with <paramref name="factory"/> and stores it when it is not cached.
         /// </summary>
+        /// <typeparam name="TResult"><typeparamref name="TEntity"/> or <c>TEntity?</c>, inferred from <paramref name="factory"/>.</typeparam>
         /// <param name="key">A string identifying the requested entity.</param>
         /// <param name="factory">Creates the entity on a cache miss. It is not called when a valid cached value exists.</param>
         /// <param name="options">Optional. The cache options for a newly stored entity. When null, the default options configured at registration are used.</param>
@@ -39,14 +40,22 @@ namespace CacheManager.Redis.Interfaces
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the cached or newly created entity.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         /// <remarks>
         /// Throws an <see cref="ArgumentNullException" /> if <paramref name="key" /> or <paramref name="factory" /> is null.
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
+        /// Throws an <see cref="InvalidOperationException" /> before reading or writing the cache if <typeparamref name="TResult"/>
+        /// is a subclass of <typeparamref name="TEntity"/> that the serializer can't read back as that subclass. To cache
+        /// subclasses, use a manager for the subclass, or mark <typeparamref name="TEntity"/> with <c>[JsonDerivedType]</c>.
+        /// Also throws it if the key already holds a different subclass.
         /// A cached value that cannot be deserialized is treated as a miss.
         /// If <paramref name="factory"/> returns null, nothing is stored and null is returned.
+        /// <typeparamref name="TResult"/> is inferred from <paramref name="factory"/>: a factory returning
+        /// <c>Task&lt;TEntity&gt;</c> gives a non-nullable result, one returning <c>Task&lt;TEntity?&gt;</c> a nullable one.
         /// </remarks>
-        Task<TEntity?> GetOrSetAsync(string key, Func<CancellationToken, Task<TEntity?>> factory,
-            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default);
+        Task<TResult> GetOrSetAsync<TResult>(string key, Func<CancellationToken, Task<TResult>> factory,
+            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+            where TResult : TEntity?;
 
         /// <summary>
         /// Sets the entity with the given key.

@@ -13,8 +13,9 @@ namespace CacheManager.Redis.Tests.Fakers
         public Task<T?> GetAsync(string key, CancellationToken cancellationToken = default)
             => throw new System.NotImplementedException();
 
-        public Task<T?> GetOrSetAsync(string key, System.Func<CancellationToken, Task<T?>> factory,
+        public Task<TResult> GetOrSetAsync<TResult>(string key, System.Func<CancellationToken, Task<TResult>> factory,
             DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+            where TResult : T?
             => throw new System.NotImplementedException();
 
         public void Set(string key, T entity)

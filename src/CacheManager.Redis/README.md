@@ -112,6 +112,8 @@ var book = await _cacheManager.GetOrSetAsync(
 
 If the factory returns `null`, nothing is cached. When you don't pass options, `DefaultCacheOptions` is used.
 
+The factory should return the manager's type (`Book` here). If it returns a subclass, use a manager for that subclass, or mark the base class with `[JsonDerivedType]`. Otherwise `GetOrSetAsync` throws an `InvalidOperationException` on the first call, before anything is cached.
+
 Available operations:
 
 - `TryGet` / `GetAsync` – read-through access returning `bool` or nullable values.
@@ -165,6 +167,15 @@ public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : cla
 ```
 
 > **Upgrading to 2.3.0:** `IRedisCacheManager<T>` gained `GetOrSetAsync`, `TryRemoveAsync` and `TryRefreshAsync`. If you have your own implementation or decorator, add them (a decorator can simply delegate each one to `_inner`).
+
+> **Upgrading to 2.3.1:** `GetOrSetAsync` is now generic, so a factory returning `Task<T>` no longer gives warning CS8619. Calling code doesn't change. If you have your own implementation or decorator, update its signature:
+>
+> ```csharp
+> public Task<TResult> GetOrSetAsync<TResult>(string key, Func<CancellationToken, Task<TResult>> factory,
+>     DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+>     where TResult : T?
+>     => _inner.GetOrSetAsync(key, factory, options, cancellationToken);
+> ```
 
 Register it with [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate` extension in your application's startup. Add the `Scrutor` NuGet package to your app (it is not a dependency of `CacheManager.Redis` itself), then:
 
