@@ -100,9 +100,22 @@ public sealed class MainController : ControllerBase
 }
 ```
 
+Or do the same in one call with `GetOrSetAsync`. It returns the cached value, or runs your factory, caches the result and returns it:
+
+```csharp
+var book = await _cacheManager.GetOrSetAsync(
+    "book-key",
+    ct => _repository.GetBookAsync(1, ct),
+    new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromDays(1) }, // optional
+    cancellationToken);
+```
+
+If the factory returns `null`, nothing is cached. When you don't pass options, `DefaultCacheOptions` is used.
+
 Available operations:
 
 - `TryGet` / `GetAsync` – read-through access returning `bool` or nullable values.
+- `GetOrSetAsync` – get the cached value, or create, cache and return it in one call.
 - `Set` / `SetAsync` – write-through storage with optional `DistributedCacheEntryOptions`.
 - `TrySet` – best-effort write that returns `false` for invalid keys without throwing.
 - `Refresh` / `RefreshAsync` – reset sliding expiration.
@@ -150,6 +163,8 @@ public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : cla
 }
 ```
 
+> **Upgrading to 2.3.0:** `IRedisCacheManager<T>` gained `GetOrSetAsync`. If you have your own implementation or decorator, add it (a decorator can simply delegate to `_inner.GetOrSetAsync`).
+
 Register it with [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate` extension in your application's startup. Add the `Scrutor` NuGet package to your app (it is not a dependency of `CacheManager.Redis` itself), then:
 
 ```csharp
@@ -186,7 +201,7 @@ Unit tests live under `test/CacheManager.Redis.Tests` and target `net8.0` and `n
 
 - Serialization helpers (`SerializeExtensions`, `Helpers.HasValue`).
 - Dependency injection setup (`SetupTests`).
-- `RedisCacheManager` behaviours (sync/async, error handling, refresh/remove).
+- `RedisCacheManager` behaviours (sync/async, get-or-set, error handling, refresh/remove).
 
 Run the suite with:
 
