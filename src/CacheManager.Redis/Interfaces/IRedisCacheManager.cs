@@ -66,9 +66,9 @@ namespace CacheManager.Redis.Interfaces
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>
         /// <param name="entity">The entity to set in the cache.</param>
-        /// <returns>A boolean which shows if the set was successful and out the located entity or null</returns>
+        /// <returns>true if the set was sent to the cache; otherwise false.</returns>
         /// <remarks>
-        /// return false if the key is null or whitespace
+        /// Returns false if the key is null or whitespace, without calling the cache.
         /// </remarks>
         bool TrySet(string key, TEntity entity);
 
@@ -92,9 +92,9 @@ namespace CacheManager.Redis.Interfaces
         /// <param name="key">A string identifying the requested entity.</param>
         /// <param name="entity">The entity to set in the cache.</param>
         /// <param name="options"></param>
-        /// <returns>A boolean which shows if the set was successful and out the located entity or null</returns>
+        /// <returns>true if the set was sent to the cache; otherwise false.</returns>
         /// <remarks>
-        /// return false if the key is null or whitespace
+        /// Returns false if the key is null or whitespace, without calling the cache.
         /// </remarks>
         bool TrySet(string key, TEntity entity, DistributedCacheEntryOptions options);
 
@@ -146,9 +146,9 @@ namespace CacheManager.Redis.Interfaces
         /// Refreshes an entity in the cache based on its key, resetting its sliding expiration timeout (if any).
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>
-        /// <returns>A boolean which shows if the refresh was successful and out the located entity or null</returns>
+        /// <returns>true if the refresh was sent to the cache; otherwise false.</returns>
         /// <remarks>
-        /// return false if the key is null or whitespace
+        /// Returns false if the key is null or whitespace, without calling the cache.
         /// </remarks>
         bool TryRefresh(string key);
 
@@ -193,9 +193,9 @@ namespace CacheManager.Redis.Interfaces
         /// Removes the entity with the given key.
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>
-        /// <returns>A boolean which shows if the remove was successful and out the located entity or null</returns>
+        /// <returns>true if the remove was sent to the cache; otherwise false.</returns>
         /// <remarks>
-        /// return false if the key is null or whitespace
+        /// Returns false if the key is null or whitespace, without calling the cache.
         /// </remarks>
         bool TryRemove(string key);
 
