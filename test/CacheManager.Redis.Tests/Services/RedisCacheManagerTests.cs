@@ -746,7 +746,7 @@ namespace CacheManager.Redis.Tests.Services
         {
             var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
 
-            var act = () => redisCacheManager.GetOrSetAsync("key", null);
+            var act = () => redisCacheManager.GetOrSetAsync<SampleObject?>("key", null);
 
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
@@ -780,6 +780,174 @@ namespace CacheManager.Redis.Tests.Services
 
             // Assert
             receivedToken.Should().Be(cts.Token);
+        }
+
+        // A typical loader returns Task<T> (non-nullable). These tests use it the way callers do;
+        // they must compile without CS8619 and give back a non-nullable T.
+        private static Task<SampleObject> LoadSampleAsync(CancellationToken _)
+            => Task.FromResult(new SampleObject { SomeProp = 42 });
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldAcceptNonNullableLoaderMethodGroup_AndStoreResult()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+
+            // Act
+            SampleObject result = await redisCacheManager.GetOrSetAsync("key", LoadSampleAsync);
+
+            // Assert
+            result.SomeProp.Should().Be(42);
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldReturnCachedValue_WhenUsingNonNullableLoaderLambda()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            var cached = new SampleObject { SomeProp = 10 };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cached)));
+
+            // Act
+            SampleObject result = await redisCacheManager.GetOrSetAsync("key", ct => LoadSampleAsync(ct));
+
+            // Assert
+            result.Should().BeEquivalentTo(cached);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldReturnCachedSubclass_WhenBaseClassIsMarkedWithJsonDerivedType()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            MarkedAnimal cached = new MarkedDog { Name = "Rex", Breed = "Husky" };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.SerializeToUtf8Bytes(cached));
+            var factoryCalled = false;
+
+            // Act
+            MarkedDog result = await redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult(new MarkedDog { Name = "Other", Breed = "Other" });
+            });
+
+            // Assert
+            result.Name.Should().Be("Rex");
+            result.Breed.Should().Be("Husky");
+            factoryCalled.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowOnFirstCall_WhenSubclassCannotRoundTrip()
+        {
+            // Arrange: PlainAnimal has no [JsonDerivedType], so a PlainDog would be stored as a PlainAnimal.
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<PlainAnimal>(redisDistributedCache);
+            var factoryCalled = false;
+
+            // Act
+            var act = () => redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult(new PlainDog());
+            });
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*can't cache PlainDog*");
+            factoryCalled.Should().BeFalse();
+            await redisDistributedCache.DidNotReceiveWithAnyArgs().GetAsync(default!, default);
+            await redisDistributedCache.DidNotReceiveWithAnyArgs()
+                .SetAsync(default!, default!, default!, default);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldRoundTripSubclassAcrossTwoCalls_WhenBaseClassIsMarkedWithJsonDerivedType()
+        {
+            // Arrange: a substitute that behaves like a real cache (what is set is returned by the next get).
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            byte[]? stored = null;
+            redisDistributedCache
+                .When(c => c.SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>()))
+                .Do(call => stored = call.ArgAt<byte[]>(1));
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns(_ => stored);
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            var factoryCalls = 0;
+            Task<MarkedDog> Factory(CancellationToken _)
+            {
+                factoryCalls++;
+                return Task.FromResult(new MarkedDog { Name = "Rex", Breed = "Husky" });
+            }
+
+            // Act
+            MarkedDog first = await redisCacheManager.GetOrSetAsync("key", Factory);
+            MarkedDog second = await redisCacheManager.GetOrSetAsync("key", Factory);
+
+            // Assert
+            first.Breed.Should().Be("Husky");
+            second.Breed.Should().Be("Husky");
+            factoryCalls.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldRoundTripSubclass_WhenCacheHasItsOwnSerializerOptions()
+        {
+            // Arrange: custom options that haven't been used yet, plus a set→get substitute.
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            redisDistributedCache.SerializerOptions.Returns(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            byte[]? stored = null;
+            redisDistributedCache
+                .When(c => c.SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>()))
+                .Do(call => stored = call.ArgAt<byte[]>(1));
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns(_ => stored);
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            var factoryCalls = 0;
+            Task<MarkedDog> Factory(CancellationToken _)
+            {
+                factoryCalls++;
+                return Task.FromResult(new MarkedDog { Name = "Rex", Breed = "Husky" });
+            }
+
+            // Act
+            MarkedDog first = await redisCacheManager.GetOrSetAsync("key", Factory);
+            MarkedDog second = await redisCacheManager.GetOrSetAsync("key", Factory);
+
+            // Assert
+            first.Breed.Should().Be("Husky");
+            second.Breed.Should().Be("Husky");
+            factoryCalls.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowInvalidOperationException_WhenKeyHoldsADifferentSubclass()
+        {
+            // Arrange: the key holds a MarkedCat, but the caller asks for a MarkedDog.
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<MarkedAnimal>(redisDistributedCache);
+            MarkedAnimal cached = new MarkedCat { Name = "Tom", Indoor = true };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.SerializeToUtf8Bytes(cached));
+            var factoryCalled = false;
+
+            // Act
+            var act = () => redisCacheManager.GetOrSetAsync("key", _ =>
+            {
+                factoryCalled = true;
+                return Task.FromResult(new MarkedDog());
+            });
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*MarkedCat, not MarkedDog*");
+            factoryCalled.Should().BeFalse();
         }
 
         [Fact]
