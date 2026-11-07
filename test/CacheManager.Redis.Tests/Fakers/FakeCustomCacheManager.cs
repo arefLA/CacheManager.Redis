@@ -61,5 +61,11 @@ namespace CacheManager.Redis.Tests.Fakers
 
         public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
             => throw new System.NotImplementedException();
+
+        public Task<bool> TryRefreshAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
+
+        public Task<bool> TryRemoveAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
     }
 }
