@@ -746,7 +746,7 @@ namespace CacheManager.Redis.Tests.Services
         {
             var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
 
-            var act = () => redisCacheManager.GetOrSetAsync("key", null);
+            var act = () => redisCacheManager.GetOrSetAsync<SampleObject?>("key", null);
 
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
@@ -780,6 +780,45 @@ namespace CacheManager.Redis.Tests.Services
 
             // Assert
             receivedToken.Should().Be(cts.Token);
+        }
+
+        // A typical loader returns Task<T> (non-nullable). These tests use it the way callers do;
+        // they must compile without CS8619 and give back a non-nullable T.
+        private static Task<SampleObject> LoadSampleAsync(CancellationToken _)
+            => Task.FromResult(new SampleObject { SomeProp = 42 });
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldAcceptNonNullableLoaderMethodGroup_AndStoreResult()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+
+            // Act
+            SampleObject result = await redisCacheManager.GetOrSetAsync("key", LoadSampleAsync);
+
+            // Assert
+            result.SomeProp.Should().Be(42);
+            await redisDistributedCache.Received(1)
+                .SetAsync("key", Arg.Any<byte[]>(), Arg.Any<DistributedCacheEntryOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldReturnCachedValue_WhenUsingNonNullableLoaderLambda()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            var cached = new SampleObject { SomeProp = 10 };
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>())
+                .Returns(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cached)));
+
+            // Act
+            SampleObject result = await redisCacheManager.GetOrSetAsync("key", ct => LoadSampleAsync(ct));
+
+            // Assert
+            result.Should().BeEquivalentTo(cached);
         }
 
         [Fact]
