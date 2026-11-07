@@ -750,6 +750,37 @@ namespace CacheManager.Redis.Tests.Services
 
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldThrowArgumentException_WhenKeyIsWhiteSpace()
+        {
+            var redisCacheManager = new RedisCacheManager<SampleObject>(Substitute.For<IRedisDistributedCache>());
+
+            var act = () => redisCacheManager.GetOrSetAsync("   ", _ => Task.FromResult<SampleObject?>(null));
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [Fact]
+        public async Task GetOrSetAsync_ShouldPassCancellationTokenToFactory_WhenKeyIsMissing()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            redisDistributedCache.GetAsync("key", Arg.Any<CancellationToken>()).Returns((byte[]?)null);
+            using var cts = new CancellationTokenSource();
+            CancellationToken receivedToken = default;
+
+            // Act
+            await redisCacheManager.GetOrSetAsync("key", ct =>
+            {
+                receivedToken = ct;
+                return Task.FromResult<SampleObject?>(new SampleObject { SomeProp = 1 });
+            }, cancellationToken: cts.Token);
+
+            // Assert
+            receivedToken.Should().Be(cts.Token);
+        }
     }
 #pragma warning restore CS8625
 #pragma warning restore CS8604
