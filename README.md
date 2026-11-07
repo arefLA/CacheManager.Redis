@@ -120,6 +120,7 @@ Available operations:
 - `TrySet` – best-effort write that returns `false` for invalid keys without throwing.
 - `Refresh` / `RefreshAsync` – reset sliding expiration.
 - `Remove` / `RemoveAsync` – evict cache entries.
+- `TryRefresh` / `TryRefreshAsync` and `TryRemove` / `TryRemoveAsync` – like the above, but return `false` for invalid keys instead of throwing.
 
 Serialization is handled through `System.Text.Json`; you can override serializer settings globally via registration options.
 
@@ -163,7 +164,7 @@ public sealed class LoggingCacheManager<T> : IRedisCacheManager<T> where T : cla
 }
 ```
 
-> **Upgrading to 2.3.0:** `IRedisCacheManager<T>` gained `GetOrSetAsync`. If you have your own implementation or decorator, add it (a decorator can simply delegate to `_inner.GetOrSetAsync`).
+> **Upgrading to 2.3.0:** `IRedisCacheManager<T>` gained `GetOrSetAsync`, `TryRemoveAsync` and `TryRefreshAsync`. If you have your own implementation or decorator, add them (a decorator can simply delegate each one to `_inner`).
 
 Register it with [Scrutor](https://github.com/khellang/Scrutor)'s `Decorate` extension in your application's startup. Add the `Scrutor` NuGet package to your app (it is not a dependency of `CacheManager.Redis` itself), then:
 

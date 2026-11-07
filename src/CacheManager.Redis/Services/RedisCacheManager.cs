@@ -127,6 +127,16 @@ namespace CacheManager.Redis.Services
             return cache.RefreshAsync(key, cancellationToken);
         }
 
+        public async Task<bool> TryRefreshAsync(string key, CancellationToken cancellationToken = default)
+        {
+            if (!key.HasValue())
+                return false;
+
+            await cache.RefreshAsync(key, cancellationToken);
+
+            return true;
+        }
+
         public void Remove(string key)
         {
             Guard.Against.NullOrWhiteSpace(key);
@@ -149,6 +159,16 @@ namespace CacheManager.Redis.Services
             Guard.Against.NullOrWhiteSpace(key);
             
             return cache.RemoveAsync(key, cancellationToken);
+        }
+
+        public async Task<bool> TryRemoveAsync(string key, CancellationToken cancellationToken = default)
+        {
+            if (!key.HasValue())
+                return false;
+
+            await cache.RemoveAsync(key, cancellationToken);
+
+            return true;
         }
             
 

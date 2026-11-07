@@ -167,6 +167,17 @@ namespace CacheManager.Redis.Interfaces
         Task RefreshAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Refreshes an entity in the cache based on its key, resetting its sliding expiration timeout (if any).
+        /// </summary>
+        /// <param name="key">A string identifying the requested entity.</param>
+        /// <param name="cancellationToken">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing true if the refresh was sent to the cache.</returns>
+        /// <remarks>
+        /// Returns false if the key is null or whitespace, without calling the cache.
+        /// </remarks>
+        Task<bool> TryRefreshAsync(string key, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Removes the entity with the given key.
         /// </summary>
         /// <param name="key">A string identifying the requested entity.</param>
@@ -201,5 +212,16 @@ namespace CacheManager.Redis.Interfaces
         /// Throws an <see cref="ArgumentException" /> if <paramref name="key" /> is an empty or white space string.
         /// </remarks>
         Task RemoveAsync(string key, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Removes the entity with the given key.
+        /// </summary>
+        /// <param name="key">A string identifying the requested entity.</param>
+        /// <param name="cancellationToken">Optional. The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing true if the remove was sent to the cache.</returns>
+        /// <remarks>
+        /// Returns false if the key is null or whitespace, without calling the cache.
+        /// </remarks>
+        Task<bool> TryRemoveAsync(string key, CancellationToken cancellationToken = default);
     }
 }

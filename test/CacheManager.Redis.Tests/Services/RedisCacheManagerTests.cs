@@ -781,6 +781,74 @@ namespace CacheManager.Redis.Tests.Services
             // Assert
             receivedToken.Should().Be(cts.Token);
         }
+
+        [Fact]
+        public async Task TryRemoveAsync_ShouldReturnTrueAndRemove_WhenKeyIsValid()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            using var cts = new CancellationTokenSource();
+
+            // Act
+            var result = await redisCacheManager.TryRemoveAsync("key", cts.Token);
+
+            // Assert
+            result.Should().BeTrue();
+            await redisDistributedCache.Received(1).RemoveAsync("key", cts.Token);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task TryRemoveAsync_ShouldReturnFalseWithoutCallingCache_WhenKeyIsInvalid(string? key)
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+
+            // Act
+            var result = await redisCacheManager.TryRemoveAsync(key);
+
+            // Assert
+            result.Should().BeFalse();
+            await redisDistributedCache.DidNotReceiveWithAnyArgs().RemoveAsync(default!, default);
+        }
+
+        [Fact]
+        public async Task TryRefreshAsync_ShouldReturnTrueAndRefresh_WhenKeyIsValid()
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+            using var cts = new CancellationTokenSource();
+
+            // Act
+            var result = await redisCacheManager.TryRefreshAsync("key", cts.Token);
+
+            // Assert
+            result.Should().BeTrue();
+            await redisDistributedCache.Received(1).RefreshAsync("key", cts.Token);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task TryRefreshAsync_ShouldReturnFalseWithoutCallingCache_WhenKeyIsInvalid(string? key)
+        {
+            // Arrange
+            var redisDistributedCache = Substitute.For<IRedisDistributedCache>();
+            var redisCacheManager = new RedisCacheManager<SampleObject>(redisDistributedCache);
+
+            // Act
+            var result = await redisCacheManager.TryRefreshAsync(key);
+
+            // Assert
+            result.Should().BeFalse();
+            await redisDistributedCache.DidNotReceiveWithAnyArgs().RefreshAsync(default!, default);
+        }
     }
 #pragma warning restore CS8625
 #pragma warning restore CS8604
