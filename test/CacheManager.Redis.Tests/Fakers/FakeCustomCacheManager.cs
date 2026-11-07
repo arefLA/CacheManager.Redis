@@ -13,6 +13,10 @@ namespace CacheManager.Redis.Tests.Fakers
         public Task<T?> GetAsync(string key, CancellationToken cancellationToken = default)
             => throw new System.NotImplementedException();
 
+        public Task<T?> GetOrSetAsync(string key, System.Func<CancellationToken, Task<T?>> factory,
+            DistributedCacheEntryOptions? options = null, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
+
         public void Set(string key, T entity)
         {
             throw new System.NotImplementedException();
@@ -56,6 +60,12 @@ namespace CacheManager.Redis.Tests.Fakers
             => throw new System.NotImplementedException();
 
         public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
+
+        public Task<bool> TryRefreshAsync(string key, CancellationToken cancellationToken = default)
+            => throw new System.NotImplementedException();
+
+        public Task<bool> TryRemoveAsync(string key, CancellationToken cancellationToken = default)
             => throw new System.NotImplementedException();
     }
 }
