@@ -5,6 +5,22 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.3.1] — 2026-11-07
+
+### Fixed
+- `GetOrSetAsync` gave warning CS8619 when the factory returned `Task<T>` (non-nullable), which is the common case. It is now generic (`GetOrSetAsync<TResult>`), and the result type follows the factory: `Task<T>` gives `T`, `Task<T?>` gives `T?`. Calling code doesn't change.
+- `GetOrSetAsync` silently skipped the cache on every call when the factory returned a subclass of `T` that couldn't be read back as that subclass. It now throws an `InvalidOperationException` on the first call, before anything is cached, and the message explains the fix (use a manager for the subclass, or mark the base class with `[JsonDerivedType]`). Subclasses marked with `[JsonDerivedType]` are cached and read back correctly.
+- `GetOrSetAsync` also throws a clear `InvalidOperationException` when the key already holds a different subclass.
+
+### Changed
+- Custom `IRedisCacheManager<T>` implementations and decorators must update the `GetOrSetAsync` signature (see the README "Upgrading to 2.3.1" note). Callers compiled against 2.3.0 need a recompile.
+
+### Internal
+- The subclass check uses the serializer's cached type info, so it costs no extra reflection after the first call.
+- 7 new tests (83 total, on net8.0 and net10.0).
+
+---
+
 ## [2.3.0] — 2026-11-07
 
 ### Added
